@@ -1,7 +1,7 @@
 import { useState } from "react";
 
-const useTogglePassword = () => {
-  const [showPassword, setShowPassword] = useState(false);
+const Helper = () => {
+  const [showPassword, setShowPassword] = useState(null);
 
   const toggleShowPassword = () => {
     setShowPassword(!showPassword);
@@ -10,4 +10,4 @@ const useTogglePassword = () => {
   return { showPassword, toggleShowPassword };
 };
 
-export default useTogglePassword;
+export default Helper;

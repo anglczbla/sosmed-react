@@ -5,8 +5,14 @@ const Profile = () => {
   const { data, isLoading, isError, error } = useQuery({
     queryKey: ["profile"],
     queryFn: async () => {
+      const accessToken = localStorage.getItem("accessToken");
       const response = await axios.get(
-        "https://api.freeapi.app/api/v1/social-media/profile"
+        "https://api.freeapi.app/api/v1/social-media/profile",
+        {
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+          },
+        }
       );
       return response.data.data;
     },
@@ -18,7 +24,13 @@ const Profile = () => {
 
   return (
     <div>
-      <div key={data._id}>{data.account.username}</div>
+      {data && (
+        <div key={data._id}>
+          <img src={data.avatar?.url} alt={data.username} width="100" />
+          <h2>{data.username}</h2>
+          <p>{data.email}</p>
+        </div>
+      )}
     </div>
   );
 };

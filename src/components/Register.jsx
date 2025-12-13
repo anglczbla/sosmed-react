@@ -2,7 +2,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import axios from "axios";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import useTogglePassword from "../hooks/useTogglePassword";
+import useTogglePassword from "../hooks/helper";
 
 const Register = () => {
   const queryClient = useQueryClient();
@@ -13,11 +13,20 @@ const Register = () => {
     password: "",
     username: "",
   });
+  const [showLogin, setShowLogin] = useState(null);
 
   const handleChangeForm = (e) => {
     const { name, value } = e.target;
     setFormRegist({ ...formRegist, [name]: value });
   };
+
+  const toggleLogin = () => {
+    setShowLogin(!showLogin);
+  };
+
+  if (showLogin === true) {
+    navigate("/login");
+  }
 
   const registrasi = useMutation({
     mutationFn: (regist) => {
@@ -28,7 +37,7 @@ const Register = () => {
     },
     onSuccess: () => {
       alert("registration success");
-      navigate("/");
+      navigate("/login");
       queryClient.invalidateQueries({ queryKey: ["regist"] });
       setFormRegist({
         email: "",
@@ -75,6 +84,7 @@ const Register = () => {
           onChange={handleChangeForm}
         />
         <button type="submit">Register</button>
+        <button onClick={toggleLogin}>Already Regist?</button>
       </form>
     </div>
   );

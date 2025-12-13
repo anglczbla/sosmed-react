@@ -1,15 +1,24 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import axios from "axios";
 import { useState } from "react";
-import useTogglePassword from "../hooks/useTogglePassword";
+import { useNavigate } from "react-router-dom";
+import Helper from "../hooks/helper";
 
 const Login = () => {
   const queryClient = useQueryClient();
-  const { showPassword, toggleShowPassword } = useTogglePassword();
+  const navigate = useNavigate();
+  const { showPassword, toggleShowPassword } = Helper();
   const [formLogin, setFormLogin] = useState({
     username: "",
     password: "",
   });
+  const [showRegist, setShowRegist] = useState(null);
+
+  const toggleRegist = () => {
+    setShowRegist(!showRegist);
+  };
+
+  toggleRegist ? navigate("/") : null;
 
   const handleFormLogin = (e) => {
     const { name, value } = e.target;
@@ -20,9 +29,15 @@ const Login = () => {
     mutationFn: (login) => {
       return axios.post("https://api.freeapi.app/api/v1/users/login", login);
     },
-    onSuccess: () => {
+    onSuccess: (data) => {
       alert("login success");
+      const { accessToken, user } = data.data;
+      console.log("isi", accessToken, user);
+
+      localStorage.setItem("accessToken", accessToken);
+      localStorage.setItem("user", JSON.stringify(user));
       queryClient.invalidateQueries({ queryKey: ["login"] });
+      navigate("/home");
       setFormLogin({
         username: "",
         password: "",
@@ -61,6 +76,7 @@ const Login = () => {
           {showPassword ? "Hide" : "Show"}
         </button>
         <button type="submit">Login</button>
+        <button onClick={toggleRegist}>Not Registed?</button>
       </form>
     </div>
   );
