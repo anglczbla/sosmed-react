@@ -18,7 +18,9 @@ const Login = () => {
     setShowRegist(!showRegist);
   };
 
-  toggleRegist ? navigate("/") : null;
+  if (toggleRegist == true) {
+    navigate("/");
+  }
 
   const handleFormLogin = (e) => {
     const { name, value } = e.target;
