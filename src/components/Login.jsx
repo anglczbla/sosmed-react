@@ -1,22 +1,19 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import axios from "axios";
 import { useState } from "react";
+import useTogglePassword from "../hooks/useTogglePassword";
 
 const Login = () => {
   const queryClient = useQueryClient();
+  const { showPassword, toggleShowPassword } = useTogglePassword();
   const [formLogin, setFormLogin] = useState({
     username: "",
     password: "",
   });
-  const [showPassword, setShowPassword] = useState(null);
 
   const handleFormLogin = (e) => {
     const { name, value } = e.target;
     setFormLogin({ ...formLogin, [name]: value });
-  };
-
-  const toggleShowPassword = () => {
-    setShowPassword(!showPassword);
   };
 
   const login = useMutation({

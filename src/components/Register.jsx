@@ -2,24 +2,21 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import axios from "axios";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import useTogglePassword from "../hooks/useTogglePassword";
 
 const Register = () => {
   const queryClient = useQueryClient();
   const navigate = useNavigate();
+  const { showPassword, toggleShowPassword } = useTogglePassword();
   const [formRegist, setFormRegist] = useState({
     email: "",
     password: "",
     username: "",
   });
-  const [showPassword, setShowPassword] = useState(null);
 
   const handleChangeForm = (e) => {
     const { name, value } = e.target;
     setFormRegist({ ...formRegist, [name]: value });
-  };
-
-  const toggleShowPassword = () => {
-    setShowPassword(!showPassword);
   };
 
   const registrasi = useMutation({
