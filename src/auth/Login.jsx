@@ -33,12 +33,11 @@ const Login = () => {
     },
     onSuccess: (data) => {
       alert("login success");
-      const { accessToken, user } = data.data;
-      console.log("isi", accessToken, user);
+      const { accessToken, user } = data.data.data;
+      console.log("isi data", data);
 
       localStorage.setItem("accessToken", accessToken);
       localStorage.setItem("user", JSON.stringify(user));
-      queryClient.invalidateQueries({ queryKey: ["login"] });
       navigate("/home");
       setFormLogin({
         username: "",
