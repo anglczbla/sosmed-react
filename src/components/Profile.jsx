@@ -3,6 +3,16 @@ import axios from "axios";
 import { useState } from "react";
 
 const Profile = () => {
+  const [formEdit, setFormEdit] = useState({
+    bio: "",
+    countryCode: "",
+    dob: "",
+    firstName: "",
+    lastName: "",
+    location: "",
+    phoneNumber: "",
+  });
+  const [showFormEdit, setShowFormEdit] = useState(null);
   const queryClient = useQueryClient();
   const { data, isLoading, isError, error } = useQuery({
     queryKey: ["profile"],
@@ -46,6 +56,39 @@ const Profile = () => {
       console.error(error);
     },
   });
+
+  const updateProfileAPI = useMutation({
+    mutationFn: (formEdit) => {
+      const accessToken = localStorage.getItem("accessToken");
+      return axios.patch(
+        "https://api.freeapi.app/api/v1/social-media/profile",
+        formEdit,
+        {
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+          },
+        }
+      );
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["profile"] });
+      alert("success update profile");
+      setFormEdit({
+        bio: "",
+        countryCode: "",
+        dob: "",
+        firstName: "",
+        lastName: "",
+        location: "",
+        phoneNumber: "",
+      });
+      setShowFormEdit(null);
+    },
+    onError: (error) => {
+      console.error(error);
+    },
+  });
+
   const [newAvatar, setNewAvatar] = useState(null);
 
   const [showFormAvatar, setShowFormAvatar] = useState(null);
@@ -58,6 +101,11 @@ const Profile = () => {
     setShowFormAvatar(!showFormAvatar);
   };
 
+  const handleEdit = (e) => {
+    const { name, value } = e.target;
+    setFormEdit({ ...formEdit, [name]: value });
+  };
+
   if (isLoading) return "Loading...";
 
   if (isError) return "An error has occurred: " + error.message;
@@ -66,6 +114,14 @@ const Profile = () => {
 
   const updateNewAvatar = (avatar) => {
     updateAvatar.mutate(avatar);
+  };
+
+  const showEditForm = () => {
+    setShowFormEdit(!showFormEdit);
+  };
+
+  const updateProfile = (formEdit) => {
+    updateProfileAPI.mutate(formEdit);
   };
 
   return (
@@ -90,8 +146,79 @@ const Profile = () => {
               <button onClick={() => updateNewAvatar(newAvatar)}>Update</button>
             </div>
           ) : null}
-          <h2>{data.account.username}</h2>
-          <p>{data.account.email}</p>
+          <h2>Username: {data.account.username}</h2>
+          <p>Email: {data.account.email}</p>
+          <p>First Name: {data.firstName}</p>
+          <p>Last Name: {data.lastName}</p>
+          <p>Followers: {data.followersCount}</p>
+          <p>Following: {data.followingCount}</p>
+          <p>Bio: {data.bio}</p>
+          <p>Phone Number: {data.phoneNumber}</p>
+          <p>Location: {data.location}</p>
+          <button onClick={showEditForm}>Edit Profile</button>
+          {showFormEdit == true ? (
+            <div>
+              <label htmlFor="bio">Bio</label>
+              <input
+                type="text"
+                name="bio"
+                value={formEdit.bio}
+                onChange={handleEdit}
+                placeholder="Add bio"
+              />
+              <label htmlFor="countryCode">Country Code</label>
+              <input
+                type="phone"
+                name="countryCode"
+                value={formEdit.countryCode}
+                onChange={handleEdit}
+                placeholder="Add Country Code"
+              />
+              <label htmlFor="dob">DOB</label>
+              <input
+                type="date"
+                name="dob"
+                value={formEdit.dob}
+                onChange={handleEdit}
+                placeholder="Add Dob"
+              />
+              <label htmlFor="firstName">First Name</label>
+              <input
+                type="text"
+                name="firstName"
+                value={formEdit.firstName}
+                onChange={handleEdit}
+                placeholder="First Name"
+              />
+              <label htmlFor="lastName">Last Name</label>
+              <input
+                type="text"
+                name="lastName"
+                value={formEdit.lastName}
+                onChange={handleEdit}
+                placeholder="Last Name"
+              />
+              <label htmlFor="location">Location</label>
+              <input
+                type="text"
+                name="location"
+                value={formEdit.location}
+                onChange={handleEdit}
+                placeholder="Location"
+              />
+              <label htmlFor="phoneNumber">Phone Number</label>
+              <input
+                type="phone"
+                name="phoneNumber"
+                value={formEdit.phoneNumber}
+                onChange={handleEdit}
+                placeholder="Phone Number"
+              />
+            </div>
+          ) : null}
+          <button onClick={() => updateProfile(formEdit)}>
+            Update Profile
+          </button>
         </div>
       )}
     </div>
