@@ -3,6 +3,7 @@ import { BrowserRouter, Route, Routes } from "react-router-dom";
 import "./App.css";
 import Login from "./auth/Login";
 import Register from "./auth/Register";
+import CreatePost from "./components/CreatePost";
 import Home from "./components/Home";
 import Profile from "./components/Profile";
 import ProtectedNavbar from "./components/ProtectedNavbar";
@@ -21,6 +22,7 @@ function App() {
             <Route element={<ProtectedNavbar />}>
               <Route path="/home" element={<Home />} />
               <Route path="/profile" element={<Profile />} />
+              <Route path="/create-post" element={<CreatePost />} />
             </Route>
           </Routes>
         </AuthProvider>
