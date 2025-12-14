@@ -19,6 +19,9 @@ const CreatePost = () => {
   const [editImages, setEditImages] = useState([]);
   const [images, setImages] = useState([]);
   const [showEditForm, setShowEditForm] = useState(null);
+  const [comment, setComment] = useState({
+    content: "",
+  });
 
   const { data, isLoading, isError } = useQuery({
     queryKey: ["post", page, limit],
@@ -101,6 +104,7 @@ const CreatePost = () => {
         "tags[0]": "",
       });
       setEditImages(null);
+      setShowEditForm(null);
     },
     onError: (error) => {
       console.error(error);
@@ -128,6 +132,32 @@ const CreatePost = () => {
     },
   });
 
+  const commentAPI = useMutation({
+    mutationFn: (data) => {
+      const { postId, comment } = data;
+      const accessToken = localStorage.getItem("accessToken");
+      return axios.post(
+        `https://api.freeapi.app/api/v1/social-media/comments/post/${postId}`,
+        comment,
+        {
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+          },
+        }
+      );
+    },
+    onSuccess: () => {
+      alert("success add comment");
+      queryClient.invalidateQueries({ queryKey: ["post"] });
+      setComment({
+        content: "",
+      });
+    },
+    onError: () => {
+      console.error(error);
+    },
+  });
+
   if (isLoading) return "Loading...";
   if (isError) return "An error has occurred";
 
@@ -151,6 +181,11 @@ const CreatePost = () => {
     setEditImages([...editImages, ...e.target.files]);
   };
 
+  const handleChangeComment = (e) => {
+    const { name, value } = e.target;
+    setComment({ ...comment, [name]: value });
+  };
+
   const toggleShowEditPost = (index) => {
     setShowEditForm(index);
   };
@@ -168,6 +203,11 @@ const CreatePost = () => {
   const updatePost = (editPost, editImages, id) => {
     const newPost = { editPost, editImages, id };
     updatePostAPI.mutate(newPost);
+  };
+
+  const addComment = (postId, comment) => {
+    const data = { postId, comment };
+    commentAPI.mutate(data);
   };
 
   return (
@@ -230,6 +270,15 @@ const CreatePost = () => {
                 <p>Comment: {d.comments}</p>
                 <p>{d.tags.forEach((t) => t)}</p>
                 <button onClick={() => deletePost(d._id)}>Delete Post</button>
+                <input
+                  type="text"
+                  name="content"
+                  onChange={handleChangeComment}
+                  placeholder="add comment"
+                />
+                <button onClick={() => addComment(d._id, comment)}>
+                  Add Comment
+                </button>
                 <button onClick={() => toggleShowEditPost(index)}>
                   Edit Post
                 </button>
