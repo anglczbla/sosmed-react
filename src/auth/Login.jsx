@@ -12,15 +12,10 @@ const Login = () => {
     username: "",
     password: "",
   });
-  const [showRegist, setShowRegist] = useState(null);
 
   const toggleRegist = () => {
-    setShowRegist(!showRegist);
-  };
-
-  if (toggleRegist == true) {
     navigate("/");
-  }
+  };
 
   const handleFormLogin = (e) => {
     const { name, value } = e.target;
@@ -77,7 +72,7 @@ const Login = () => {
           {showPassword ? "Hide" : "Show"}
         </button>
         <button type="submit">Login</button>
-        <button onClick={toggleRegist}>Not Registed?</button>
+        <button type="button" onClick={toggleRegist}>Not Registed?</button>
       </form>
     </div>
   );

@@ -12,7 +12,6 @@ const Register = () => {
     password: "",
     username: "",
   });
-  const [showLogin, setShowLogin] = useState(null);
 
   const handleChangeForm = (e) => {
     const { name, value } = e.target;
@@ -20,12 +19,8 @@ const Register = () => {
   };
 
   const toggleLogin = () => {
-    setShowLogin(!showLogin);
-  };
-
-  if (showLogin === true) {
     navigate("/login");
-  }
+  };
 
   const registrasi = useMutation({
     mutationFn: (regist) => {

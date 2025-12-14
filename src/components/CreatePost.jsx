@@ -69,6 +69,27 @@ const CreatePost = () => {
     },
   });
 
+  const deletePostAPI = useMutation({
+    mutationFn: (postId) => {
+      const accessToken = localStorage.getItem("accessToken");
+      return axios.delete(
+        `https://api.freeapi.app/api/v1/social-media/posts/${postId}`,
+        {
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+          },
+        }
+      );
+    },
+    onSuccess: () => {
+      alert("success delete post");
+      queryClient.invalidateQueries({ queryKey: ["post"] });
+    },
+    onError: (error) => {
+      console.error(error);
+    },
+  });
+
   if (isLoading) return "Loading...";
   if (isError) return "An error has occurred";
 
@@ -87,6 +108,10 @@ const CreatePost = () => {
     e.preventDefault();
     const data = { formPost, images };
     createPost.mutate(data);
+  };
+
+  const deletePost = (postId) => {
+    deletePostAPI.mutate(postId);
   };
 
   return (
@@ -148,6 +173,9 @@ const CreatePost = () => {
                 <p>Likes: {d.likes}</p>
                 <p>Comment: {d.comments}</p>
                 <p>{d.tags.forEach((t) => t)}</p>
+                <button onClick={() => deletePost(d._id)}>
+                  Delete Post
+                </button>
               </div>
             ))}
           </div>
