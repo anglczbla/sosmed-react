@@ -12,7 +12,13 @@ const CreatePost = () => {
     "tags[1]": "",
     "tags[2]": "",
   });
+  const [editPost, setEditPost] = useState({
+    content: "",
+    "tags[0]": "",
+  });
+  const [editImages, setEditImages] = useState([]);
   const [images, setImages] = useState([]);
+  const [showEditForm, setShowEditForm] = useState(null);
 
   const { data, isLoading, isError } = useQuery({
     queryKey: ["post", page, limit],
@@ -69,6 +75,38 @@ const CreatePost = () => {
     },
   });
 
+  const updatePostAPI = useMutation({
+    mutationFn: (newData) => {
+      const { editPost, editImages, id } = newData;
+      const accessToken = localStorage.getItem("accessToken");
+      const formData = new FormData();
+      formData.append("content", editPost.content);
+      editImages.forEach((i) => formData.append("images", i));
+      formData.append("tags[0]", editPost["tags[0]"]);
+      return axios.patch(
+        `https://api.freeapi.app/api/v1/social-media/posts/${id}`,
+        formData,
+        {
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+          },
+        }
+      );
+    },
+    onSuccess: () => {
+      alert("success update post");
+      queryClient.invalidateQueries({ queryKey: ["post"] });
+      setEditPost({
+        content: "",
+        "tags[0]": "",
+      });
+      setEditImages(null);
+    },
+    onError: (error) => {
+      console.error(error);
+    },
+  });
+
   const deletePostAPI = useMutation({
     mutationFn: (postId) => {
       const accessToken = localStorage.getItem("accessToken");
@@ -104,6 +142,19 @@ const CreatePost = () => {
     setImages([...images, ...e.target.files]);
   };
 
+  const handleEditPost = (e) => {
+    const { name, value } = e.target;
+    setEditPost({ ...editPost, [name]: value });
+  };
+
+  const handleEditImage = (e) => {
+    setEditImages([...editImages, ...e.target.files]);
+  };
+
+  const toggleShowEditPost = (index) => {
+    setShowEditForm(index);
+  };
+
   const submitPost = (e) => {
     e.preventDefault();
     const data = { formPost, images };
@@ -112,6 +163,11 @@ const CreatePost = () => {
 
   const deletePost = (postId) => {
     deletePostAPI.mutate(postId);
+  };
+
+  const updatePost = (editPost, editImages, id) => {
+    const newPost = { editPost, editImages, id };
+    updatePostAPI.mutate(newPost);
   };
 
   return (
@@ -160,7 +216,7 @@ const CreatePost = () => {
         <div>
           <h1>Explore Post</h1>
           <div>
-            {data.posts.map((d) => (
+            {data.posts.map((d, index) => (
               <div key={d._id}>
                 <p>{d.content}</p>
                 <p>
@@ -173,9 +229,41 @@ const CreatePost = () => {
                 <p>Likes: {d.likes}</p>
                 <p>Comment: {d.comments}</p>
                 <p>{d.tags.forEach((t) => t)}</p>
-                <button onClick={() => deletePost(d._id)}>
-                  Delete Post
+                <button onClick={() => deletePost(d._id)}>Delete Post</button>
+                <button onClick={() => toggleShowEditPost(index)}>
+                  Edit Post
                 </button>
+                {showEditForm == index ? (
+                  <div>
+                    <input
+                      type="text"
+                      name="content"
+                      value={editPost.content}
+                      placeholder="add content"
+                      onChange={handleEditPost}
+                    />
+                    <input
+                      type="text"
+                      name="tags[0]"
+                      value={editPost["tags[0]"]}
+                      placeholder="add tags"
+                      onChange={handleEditPost}
+                    />
+                    <input
+                      type="file"
+                      multiple={true}
+                      name="editImages"
+                      accept="image/*"
+                      placeholder="send new image"
+                      onChange={handleEditImage}
+                    />
+                    <button
+                      onClick={() => updatePost(editPost, editImages, d._id)}
+                    >
+                      Update Post
+                    </button>
+                  </div>
+                ) : null}
               </div>
             ))}
           </div>

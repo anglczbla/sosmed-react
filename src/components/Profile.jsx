@@ -214,11 +214,11 @@ const Profile = () => {
                 onChange={handleEdit}
                 placeholder="Phone Number"
               />
+              <button onClick={() => updateProfile(formEdit)}>
+                Update Profile
+              </button>
             </div>
           ) : null}
-          <button onClick={() => updateProfile(formEdit)}>
-            Update Profile
-          </button>
         </div>
       )}
     </div>
