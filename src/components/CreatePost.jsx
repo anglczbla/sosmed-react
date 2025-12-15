@@ -160,6 +160,28 @@ const CreatePost = () => {
     },
   });
 
+  const likesPostAPI = useMutation({
+    mutationFn: (id) => {
+      const accessToken = localStorage.getItem("accessToken");
+      return axios.post(
+        `https://api.freeapi.app/api/v1/social-media/like/post/${id}`,
+        {},
+        {
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+          },
+        }
+      );
+    },
+    onSuccess: () => {
+      alert("success like post");
+      queryClient.invalidateQueries({ queryKey: ["post"] });
+    },
+    onError: (error) => {
+      console.error(error);
+    },
+  });
+
   if (isLoading) return "Loading...";
   if (isError) return "An error has occurred";
 
@@ -214,6 +236,10 @@ const CreatePost = () => {
 
   const toggleComments = (id) => {
     setActiveCommentId(activeCommentId === id ? null : id);
+  };
+
+  const likePost = (id) => {
+    likesPostAPI.mutate(id);
   };
 
   return (
@@ -273,6 +299,7 @@ const CreatePost = () => {
                 {/* <p>Created By: {d.author.account?.username}</p> */}
                 <p>Created at: {d.createdAt}</p>
                 <p>Likes: {d.likes}</p>
+                <button onClick={() => likePost(d._id)}>Like Post</button>
                 <p>Comment: {d.comments}</p>
                 <button onClick={() => toggleComments(d._id)}>
                   {activeCommentId === d._id ? "Hide Comments" : "See Comments"}

@@ -161,6 +161,9 @@ const CommentList = ({ postId }) => {
                 <button onClick={() => likeComment(comment._id)}>
                   Likes Comment
                 </button>
+                <button onClick={() => likeComment(comment._id)}>
+                  Unlike Comment
+                </button>
                 <button onClick={() => deleteComment(comment._id)}>
                   Delete Comment
                 </button>
