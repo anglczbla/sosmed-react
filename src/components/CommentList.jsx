@@ -1,7 +1,8 @@
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import axios from "axios";
 
 const CommentList = ({ postId }) => {
+  const queryClient = useQueryClient();
   const { data, isLoading, isError, error } = useQuery({
     queryKey: ["comments", postId],
     queryFn: async () => {
@@ -18,6 +19,31 @@ const CommentList = ({ postId }) => {
     },
     enabled: !!postId,
   });
+
+  const deleteCommentAPI = useMutation({
+    mutationFn: (id) => {
+      const accessToken = localStorage.getItem("accessToken");
+      return axios.delete(
+        `https://api.freeapi.app/api/v1/social-media/comments/${id}`,
+        {
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+          },
+        }
+      );
+    },
+    onSuccess: () => {
+      alert("success delete comment");
+      queryClient.invalidateQueries({ queryKey: ["comments"] });
+    },
+    onError: (error) => {
+      console.error(error);
+    },
+  });
+
+  const deleteComment = (id) => {
+    deleteCommentAPI.mutate(id);
+  };
 
   if (isLoading)
     return <p className="text-sm text-gray-500">Loading comments...</p>;
@@ -43,21 +69,28 @@ const CommentList = ({ postId }) => {
       {comments.length === 0 ? (
         <p>No comments yet.</p>
       ) : (
-        <ul style={{ listStyle: "none", padding: 0 }}>
-          {comments.map((comment) => (
-            <li
-              key={comment._id}
-              style={{
-                marginBottom: "8px",
-                borderBottom: "1px solid #eee",
-                paddingBottom: "4px",
-              }}
-            >
-              <strong>{comment.author?.username || "User"}</strong>:{" "}
-              {comment.content}
-            </li>
-          ))}
-        </ul>
+        <div>
+          <ul style={{ listStyle: "none", padding: 0 }}>
+            {comments.map((comment) => (
+              <div>
+                <li
+                  key={comment._id}
+                  style={{
+                    marginBottom: "8px",
+                    borderBottom: "1px solid #eee",
+                    paddingBottom: "4px",
+                  }}
+                >
+                  <strong>{comment.author?.username || "User"}</strong>:{" "}
+                  {comment.content}
+                </li>
+                <button onClick={() => deleteComment(comment._id)}>
+                  Delete Comment
+                </button>
+              </div>
+            ))}
+          </ul>
+        </div>
       )}
     </div>
   );
