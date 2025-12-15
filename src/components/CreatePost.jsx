@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import axios from "axios";
 import { useState } from "react";
+import apiClient from "../utils/api";
 import CommentList from "./CommentList";
 
 const CreatePost = () => {
@@ -28,14 +28,8 @@ const CreatePost = () => {
   const { data, isLoading, isError } = useQuery({
     queryKey: ["post", page, limit],
     queryFn: async () => {
-      const accessToken = localStorage.getItem("accessToken");
-      const response = await axios.get(
-        `https://api.freeapi.app/api/v1/social-media/posts?page=${page}&limit=${limit}`,
-        {
-          headers: {
-            Authorization: `Bearer ${accessToken}`,
-          },
-        }
+      const response = await apiClient.get(
+        `/social-media/posts?page=${page}&limit=${limit}`
       );
       return response.data.data;
     },
@@ -45,7 +39,6 @@ const CreatePost = () => {
   const createPost = useMutation({
     mutationFn: (data) => {
       const { formPost: newPost, images } = data;
-      const accessToken = localStorage.getItem("accessToken");
       const formData = new FormData();
       formData.append("content", newPost.content);
       images.forEach((image) => {
@@ -54,15 +47,7 @@ const CreatePost = () => {
       formData.append("tags[0]", newPost["tags[0]"]);
       formData.append("tags[1]", newPost["tags[1]"]);
       formData.append("tags[2]", newPost["tags[2]"]);
-      return axios.post(
-        "https://api.freeapi.app/api/v1/social-media/posts",
-        formData,
-        {
-          headers: {
-            Authorization: `Bearer ${accessToken}`,
-          },
-        }
-      );
+      return apiClient.post("/social-media/posts", formData);
     },
     onSuccess: () => {
       alert("success add post");
@@ -73,7 +58,7 @@ const CreatePost = () => {
         "tags[1]": "",
         "tags[2]": "",
       });
-      setImages(null);
+      setImages([]);
     },
     onError: (error) => {
       console.error(error);
@@ -83,20 +68,11 @@ const CreatePost = () => {
   const updatePostAPI = useMutation({
     mutationFn: (newData) => {
       const { editPost, editImages, id } = newData;
-      const accessToken = localStorage.getItem("accessToken");
       const formData = new FormData();
       formData.append("content", editPost.content);
       editImages.forEach((i) => formData.append("images", i));
       formData.append("tags[0]", editPost["tags[0]"]);
-      return axios.patch(
-        `https://api.freeapi.app/api/v1/social-media/posts/${id}`,
-        formData,
-        {
-          headers: {
-            Authorization: `Bearer ${accessToken}`,
-          },
-        }
-      );
+      return apiClient.patch(`/social-media/posts/${id}`, formData);
     },
     onSuccess: () => {
       alert("success update post");
@@ -105,7 +81,7 @@ const CreatePost = () => {
         content: "",
         "tags[0]": "",
       });
-      setEditImages(null);
+      setEditImages([]);
       setShowEditForm(null);
     },
     onError: (error) => {
@@ -115,15 +91,7 @@ const CreatePost = () => {
 
   const deletePostAPI = useMutation({
     mutationFn: (postId) => {
-      const accessToken = localStorage.getItem("accessToken");
-      return axios.delete(
-        `https://api.freeapi.app/api/v1/social-media/posts/${postId}`,
-        {
-          headers: {
-            Authorization: `Bearer ${accessToken}`,
-          },
-        }
-      );
+      return apiClient.delete(`/social-media/posts/${postId}`);
     },
     onSuccess: () => {
       alert("success delete post");
@@ -137,16 +105,7 @@ const CreatePost = () => {
   const commentAPI = useMutation({
     mutationFn: (data) => {
       const { postId, comment } = data;
-      const accessToken = localStorage.getItem("accessToken");
-      return axios.post(
-        `https://api.freeapi.app/api/v1/social-media/comments/post/${postId}`,
-        comment,
-        {
-          headers: {
-            Authorization: `Bearer ${accessToken}`,
-          },
-        }
-      );
+      return apiClient.post(`/social-media/comments/post/${postId}`, comment);
     },
     onSuccess: () => {
       alert("success add comment");
@@ -162,16 +121,7 @@ const CreatePost = () => {
 
   const likesPostAPI = useMutation({
     mutationFn: (id) => {
-      const accessToken = localStorage.getItem("accessToken");
-      return axios.post(
-        `https://api.freeapi.app/api/v1/social-media/like/post/${id}`,
-        {},
-        {
-          headers: {
-            Authorization: `Bearer ${accessToken}`,
-          },
-        }
-      );
+      return apiClient.post(`/social-media/like/post/${id}`, {});
     },
     onSuccess: () => {
       alert("success like post");
@@ -282,7 +232,7 @@ const CreatePost = () => {
         />
         <button type="submit">Create Post</button>
       </form>
-      {data == 0 ? (
+      {data.posts.length === 0 ? (
         <p>No post </p>
       ) : (
         <div>
@@ -292,11 +242,10 @@ const CreatePost = () => {
               <div key={d._id}>
                 <p>Content: {d.content}</p>
                 <p>
-                  {d.images.map((i) => (
-                    <img src={i.url} alt="" />
+                  {d.images.map((i, idx) => (
+                    <img key={idx} src={i.url} alt="" />
                   ))}
                 </p>
-                {/* <p>Created By: {d.author.account?.username}</p> */}
                 <p>Created at: {d.createdAt}</p>
                 <p>Likes: {d.likes}</p>
                 <button onClick={() => likePost(d._id)}>Like Post</button>
@@ -305,11 +254,12 @@ const CreatePost = () => {
                   {activeCommentId === d._id ? "Hide Comments" : "See Comments"}
                 </button>
                 {activeCommentId === d._id && <CommentList postId={d._id} />}
-                <p>{d.tags.forEach((t) => t)}</p>
+                <p>{d.tags.join(", ")}</p>
                 <button onClick={() => deletePost(d._id)}>Delete Post</button>
                 <input
                   type="text"
                   name="content"
+                  value={comment.content}
                   onChange={handleChangeComment}
                   placeholder="add comment"
                 />
@@ -319,7 +269,7 @@ const CreatePost = () => {
                 <button onClick={() => toggleShowEditPost(index)}>
                   Edit Post
                 </button>
-                {showEditForm == index ? (
+                {showEditForm === index ? (
                   <div>
                     <input
                       type="text"

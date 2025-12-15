@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import axios from "axios";
 import { useState } from "react";
+import apiClient from "../utils/api";
 
 const CommentList = ({ postId }) => {
   const queryClient = useQueryClient();
@@ -8,17 +8,12 @@ const CommentList = ({ postId }) => {
     content: "",
   });
   const [showEdit, setShowEdit] = useState(null);
+
   const { data, isLoading, isError, error } = useQuery({
     queryKey: ["comments", postId],
     queryFn: async () => {
-      const accessToken = localStorage.getItem("accessToken");
-      const response = await axios.get(
-        `https://api.freeapi.app/api/v1/social-media/comments/post/${postId}?page=1&limit=50`,
-        {
-          headers: {
-            Authorization: `Bearer ${accessToken}`,
-          },
-        }
+      const response = await apiClient.get(
+        `/social-media/comments/post/${postId}?page=1&limit=50`
       );
       return response.data.data;
     },
@@ -27,15 +22,7 @@ const CommentList = ({ postId }) => {
 
   const deleteCommentAPI = useMutation({
     mutationFn: (id) => {
-      const accessToken = localStorage.getItem("accessToken");
-      return axios.delete(
-        `https://api.freeapi.app/api/v1/social-media/comments/${id}`,
-        {
-          headers: {
-            Authorization: `Bearer ${accessToken}`,
-          },
-        }
-      );
+      return apiClient.delete(`/social-media/comments/${id}`);
     },
     onSuccess: () => {
       alert("success delete comment");
@@ -49,16 +36,7 @@ const CommentList = ({ postId }) => {
   const updateCommentAPI = useMutation({
     mutationFn: (data) => {
       const { id, updateComments } = data;
-      const accessToken = localStorage.getItem("accessToken");
-      return axios.patch(
-        `https://api.freeapi.app/api/v1/social-media/comments/${id}`,
-        updateComments,
-        {
-          headers: {
-            Authorization: `Bearer ${accessToken}`,
-          },
-        }
-      );
+      return apiClient.patch(`/social-media/comments/${id}`, updateComments);
     },
     onSuccess: () => {
       alert("success edit comments");
@@ -72,16 +50,7 @@ const CommentList = ({ postId }) => {
 
   const likesCommentAPI = useMutation({
     mutationFn: (id) => {
-      const accessToken = localStorage.getItem("accessToken");
-      return axios.post(
-        `https://api.freeapi.app/api/v1/social-media/like/comment/${id}`,
-        {},
-        {
-          headers: {
-            Authorization: `Bearer ${accessToken}`,
-          },
-        }
-      );
+      return apiClient.post(`/social-media/like/comment/${id}`, {});
     },
     onSuccess: () => {
       alert("success likes comment");
@@ -145,9 +114,8 @@ const CommentList = ({ postId }) => {
         <div>
           <ul style={{ listStyle: "none", padding: 0 }}>
             {comments.map((comment, idx) => (
-              <div>
+              <div key={comment._id}>
                 <li
-                  key={comment._id}
                   style={{
                     marginBottom: "8px",
                     borderBottom: "1px solid #eee",

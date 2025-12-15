@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import axios from "axios";
 import { useState } from "react";
+import apiClient from "../utils/api";
 
 const Profile = () => {
   const [formEdit, setFormEdit] = useState({
@@ -14,20 +14,12 @@ const Profile = () => {
   });
   const [showFormEdit, setShowFormEdit] = useState(null);
   const queryClient = useQueryClient();
+
   const { data, isLoading, isError, error } = useQuery({
     queryKey: ["profile"],
     queryFn: async () => {
-      const accessToken = localStorage.getItem("accessToken");
-      const response = await axios.get(
-        "https://api.freeapi.app/api/v1/social-media/profile",
-        {
-          headers: {
-            Authorization: `Bearer ${accessToken}`,
-          },
-        }
-      );
+      const response = await apiClient.get("/social-media/profile");
       console.log("isi response", response);
-
       return response.data.data;
     },
     staleTime: Infinity,
@@ -35,22 +27,13 @@ const Profile = () => {
 
   const updateAvatar = useMutation({
     mutationFn: (avatar) => {
-      const accessToken = localStorage.getItem("accessToken");
       const formData = new FormData();
       formData.append("avatar", avatar);
-      return axios.patch(
-        "https://api.freeapi.app/api/v1/users/avatar",
-        formData,
-        {
-          headers: {
-            Authorization: `Bearer ${accessToken}`,
-          },
-        }
-      );
+      return apiClient.patch("/users/avatar", formData);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["profile"] });
-      alert("avatar successfull update");
+      alert("avatar successfully updated");
     },
     onError: (error) => {
       console.error(error);
@@ -59,16 +42,7 @@ const Profile = () => {
 
   const updateProfileAPI = useMutation({
     mutationFn: (formEdit) => {
-      const accessToken = localStorage.getItem("accessToken");
-      return axios.patch(
-        "https://api.freeapi.app/api/v1/social-media/profile",
-        formEdit,
-        {
-          headers: {
-            Authorization: `Bearer ${accessToken}`,
-          },
-        }
-      );
+      return apiClient.patch("/social-media/profile", formEdit);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["profile"] });
@@ -90,7 +64,6 @@ const Profile = () => {
   });
 
   const [newAvatar, setNewAvatar] = useState(null);
-
   const [showFormAvatar, setShowFormAvatar] = useState(null);
 
   const handleAvatar = (e) => {
@@ -107,7 +80,6 @@ const Profile = () => {
   };
 
   if (isLoading) return "Loading...";
-
   if (isError) return "An error has occurred: " + error.message;
 
   console.log("xxx", data);
@@ -126,7 +98,6 @@ const Profile = () => {
 
   return (
     <div>
-      {/* <pre>{JSON.stringify(data, null, 2)}</pre> */}
       {data && (
         <div key={data._id}>
           <img
@@ -156,7 +127,7 @@ const Profile = () => {
           <p>Phone Number: {data.phoneNumber}</p>
           <p>Location: {data.location}</p>
           <button onClick={showEditForm}>Edit Profile</button>
-          {showFormEdit == true ? (
+          {showFormEdit === true ? (
             <div>
               <label htmlFor="bio">Bio</label>
               <input
