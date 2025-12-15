@@ -1,6 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import axios from "axios";
 import { useState } from "react";
+import CommentList from "./CommentList";
 
 const CreatePost = () => {
   const queryClient = useQueryClient();
@@ -22,6 +23,7 @@ const CreatePost = () => {
   const [comment, setComment] = useState({
     content: "",
   });
+  const [activeCommentId, setActiveCommentId] = useState(null);
 
   const { data, isLoading, isError } = useQuery({
     queryKey: ["post", page, limit],
@@ -153,7 +155,7 @@ const CreatePost = () => {
         content: "",
       });
     },
-    onError: () => {
+    onError: (error) => {
       console.error(error);
     },
   });
@@ -208,6 +210,10 @@ const CreatePost = () => {
   const addComment = (postId, comment) => {
     const data = { postId, comment };
     commentAPI.mutate(data);
+  };
+
+  const toggleComments = (id) => {
+    setActiveCommentId(activeCommentId === id ? null : id);
   };
 
   return (
@@ -268,6 +274,10 @@ const CreatePost = () => {
                 <p>Created at: {d.createdAt}</p>
                 <p>Likes: {d.likes}</p>
                 <p>Comment: {d.comments}</p>
+                <button onClick={() => toggleComments(d._id)}>
+                  {activeCommentId === d._id ? "Hide Comments" : "See Comments"}
+                </button>
+                {activeCommentId === d._id && <CommentList postId={d._id} />}
                 <p>{d.tags.forEach((t) => t)}</p>
                 <button onClick={() => deletePost(d._id)}>Delete Post</button>
                 <input
