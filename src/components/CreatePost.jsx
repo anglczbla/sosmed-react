@@ -1,11 +1,12 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import apiClient from "../utils/api";
 import CommentList from "./CommentList";
-import ProfileUser from "./ProfileUser";
 
 const CreatePost = () => {
   const queryClient = useQueryClient();
+  const navigate = useNavigate();
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(10);
   const [formPost, setFormPost] = useState({
@@ -252,14 +253,12 @@ const CreatePost = () => {
                 <p>Created at: {d.createdAt}</p>
                 <p>Username: {d.author.account.username}</p>
                 <button
-                  onClick={() => {
-                    setSelectedUsername(d.author.account.username);
-                    setShowProfile(true);
-                  }}
+                  onClick={() =>
+                    navigate(`/user-profile/${d.author.account.username}`)
+                  }
                 >
                   See Profile
                 </button>
-                {showProfile && <ProfileUser username={selectedUsername} />}
                 <p>Likes: {d.likes}</p>
                 <button onClick={() => likePost(d._id)}>Like Post</button>
                 <p>Comment: {d.comments}</p>

@@ -1,12 +1,14 @@
 import { useQuery } from "@tanstack/react-query";
+import { useParams } from "react-router-dom";
 import apiClient from "../utils/api";
 
-const ProfileUser = ({ username }) => {
+const ProfileUser = () => {
+  const { username } = useParams();
   const { data, isLoading, isError, error } = useQuery({
     queryKey: ["user", username],
     queryFn: async () => {
       const response = await apiClient.get(
-        `https://api.freeapi.app/api/v1/social-media/profile/u/${username}`
+        `social-media/profile/u/${username}`
       );
       return response.data.data;
     },

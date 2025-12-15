@@ -24,7 +24,7 @@ function App() {
               <Route path="/home" element={<Home />} />
               <Route path="/profile" element={<Profile />} />
               <Route path="/create-post" element={<CreatePost />} />
-              <Route path="/user-profile" element={<ProfileUser />} />
+              <Route path="/user-profile/:username" element={<ProfileUser />} />
             </Route>
           </Routes>
         </AuthProvider>
