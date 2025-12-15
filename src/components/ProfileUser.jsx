@@ -6,7 +6,9 @@ import apiClient from "../utils/api";
 const ProfileUser = () => {
   const { username } = useParams();
   const [showFollowers, setShowFollowers] = useState(false);
+  const [showFollowing, setShowFollowing] = useState(false);
 
+  // profile user
   const { data, isLoading, isError, error } = useQuery({
     queryKey: ["user", username],
     queryFn: async () => {
@@ -17,6 +19,7 @@ const ProfileUser = () => {
     },
   });
 
+  // followers
   const {
     data: followersData,
     isLoading: followersLoading,
@@ -32,8 +35,28 @@ const ProfileUser = () => {
     enabled: showFollowers,
   });
 
+  // following
+  const {
+    data: followingData,
+    isLoading: followingLoading,
+    isError: followingError,
+  } = useQuery({
+    queryKey: ["following", username],
+    queryFn: async () => {
+      const response = await apiClient.get(
+        `social-media/follow/list/following/${username}`
+      );
+      return response.data.data;
+    },
+    enabled: showFollowing,
+  });
+
   const toggleFollowers = () => {
     setShowFollowers(!showFollowers);
+  };
+
+  const toggleFollowing = () => {
+    setShowFollowing(!showFollowing);
   };
 
   if (isLoading)
@@ -55,45 +78,88 @@ const ProfileUser = () => {
       <p>
         First name: {data.firstName} - {data.lastName}
       </p>
-      <p>Followers: {data.followersCount}</p>
 
-      <button onClick={toggleFollowers}>
-        {showFollowers ? "Hide Followers" : "See Followers"}
-      </button>
+      {/* followers */}
+      <div>
+        <p>Followers: {data.followersCount}</p>
+        <button onClick={toggleFollowers}>
+          {showFollowers ? "Hide Followers" : "See Followers"}
+        </button>
 
-      {showFollowers && (
-        <div>
-          {followersLoading && <p>Loading followers...</p>}
+        {showFollowers && (
+          <div>
+            {followersLoading && <p>Loading followers...</p>}
+            {followersError && <p>Error loading followers</p>}
 
-          {followersError && <p>Error loading followers</p>}
+            {followersData && followersData.followers?.length === 0 && (
+              <p>No followers</p>
+            )}
 
-          {followersData && followersData.followers?.length === 0 && (
-            <p>No followers</p>
-          )}
+            {followersData && followersData.followers?.length > 0 && (
+              <div>
+                {followersData.followers.map((f) => (
+                  <div key={f._id}>
+                    <img src={f.avatar.url} alt={f.username} />
+                    <ul>
+                      <li>Username: {f.username}</li>
+                      <li>BIO: {f.profile.bio}</li>
+                      <li>Country Code: {f.profile.countryCode}</li>
+                      <li>Dob: {f.profile.dob}</li>
+                      <li>
+                        Name: {f.profile.firstName} - {f.profile.lastName}
+                      </li>
+                      <li>Location: {f.profile.location}</li>
+                    </ul>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+      </div>
 
-          {followersData && followersData.followers?.length > 0 && (
-            <div>
-              {followersData.followers.map((f) => (
-                <div key={f._id}>
-                  <img src={f.avatar.url} alt={f.username} />
-                  <ul>
-                    <li>Username: {f.username}</li>
-                    <li>BIO: {f.profile.bio}</li>
-                    <li>Country Code: {f.profile.countryCode}</li>
-                    <li>Dob: {f.profile.dob}</li>
-                    <li>
-                      Name: {f.profile.firstName} - {f.profile.lastName}
-                    </li>
-                    <li>Location: {f.profile.location}</li>
-                  </ul>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
-      )}
+      {/* following */}
+      <div>
+        <p>Following: {data.followingCount}</p>
+        <button onClick={toggleFollowing}>
+          {showFollowing ? "Hide Following" : "See Following"}
+        </button>
 
-      <p>Following: {data.followingCount}</p>
+        {showFollowing && (
+          <div>
+            {followingLoading && <p>Loading following...</p>}
+            {followingError && <p>Error loading following</p>}
+
+            {followingData && followingData.following?.length === 0 && (
+              <p>Not following anyone</p>
+            )}
+
+            {followingData && followingData.following?.length > 0 && (
+              <div>
+                {followingData.following.map((f) => (
+                  <div key={f._id}>
+                    <img src={f.avatar.url} alt={f.username} />
+                    <ul>
+                      <li>Username: {f.username}</li>
+                      <li>BIO: {f.profile.bio}</li>
+                      <li>Country Code: {f.profile.countryCode}</li>
+                      <li>Dob: {f.profile.dob}</li>
+                      <li>
+                        Name: {f.profile.firstName} - {f.profile.lastName}
+                      </li>
+                      <li>Location: {f.profile.location}</li>
+                      <li>
+                        Status:{" "}
+                        {f.isFollowing ? "Following ✓" : "Not Following"}
+                      </li>
+                    </ul>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+      </div>
     </div>
   );
 };
