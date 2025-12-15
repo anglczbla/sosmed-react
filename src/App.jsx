@@ -6,6 +6,7 @@ import Register from "./auth/Register";
 import CreatePost from "./components/CreatePost";
 import Home from "./components/Home";
 import Profile from "./components/Profile";
+import ProfileUser from "./components/ProfileUser";
 import ProtectedNavbar from "./components/ProtectedNavbar";
 import AuthProvider from "./context/AuthContext";
 
@@ -23,6 +24,7 @@ function App() {
               <Route path="/home" element={<Home />} />
               <Route path="/profile" element={<Profile />} />
               <Route path="/create-post" element={<CreatePost />} />
+              <Route path="/user-profile" element={<ProfileUser />} />
             </Route>
           </Routes>
         </AuthProvider>

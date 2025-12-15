@@ -2,6 +2,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import apiClient from "../utils/api";
 import CommentList from "./CommentList";
+import ProfileUser from "./ProfileUser";
 
 const CreatePost = () => {
   const queryClient = useQueryClient();
@@ -24,6 +25,8 @@ const CreatePost = () => {
     content: "",
   });
   const [activeCommentId, setActiveCommentId] = useState(null);
+  const [showProfile, setShowProfile] = useState(false);
+  const [selectedUsername, setSelectedUsername] = useState(null);
 
   const { data, isLoading, isError } = useQuery({
     queryKey: ["post", page, limit],
@@ -247,6 +250,16 @@ const CreatePost = () => {
                   ))}
                 </p>
                 <p>Created at: {d.createdAt}</p>
+                <p>Username: {d.author.account.username}</p>
+                <button
+                  onClick={() => {
+                    setSelectedUsername(d.author.account.username);
+                    setShowProfile(true);
+                  }}
+                >
+                  See Profile
+                </button>
+                {showProfile && <ProfileUser username={selectedUsername} />}
                 <p>Likes: {d.likes}</p>
                 <button onClick={() => likePost(d._id)}>Like Post</button>
                 <p>Comment: {d.comments}</p>
