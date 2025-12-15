@@ -70,6 +70,28 @@ const CommentList = ({ postId }) => {
     },
   });
 
+  const likesCommentAPI = useMutation({
+    mutationFn: (id) => {
+      const accessToken = localStorage.getItem("accessToken");
+      return axios.post(
+        `https://api.freeapi.app/api/v1/social-media/like/comment/${id}`,
+        {},
+        {
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+          },
+        }
+      );
+    },
+    onSuccess: () => {
+      alert("success likes comment");
+      queryClient.invalidateQueries({ queryKey: ["comments"] });
+    },
+    onError: (error) => {
+      console.error(error);
+    },
+  });
+
   const deleteComment = (id) => {
     deleteCommentAPI.mutate(id);
   };
@@ -83,9 +105,17 @@ const CommentList = ({ postId }) => {
     setShowEdit(idx);
   };
 
+  const undoEdit = () => {
+    setShowEdit(null);
+  };
+
   const saveEditComment = (id, updateComments) => {
     const data = { id, updateComments };
     updateCommentAPI.mutate(data);
+  };
+
+  const likeComment = (id) => {
+    likesCommentAPI.mutate(id);
   };
 
   if (isLoading)
@@ -127,10 +157,15 @@ const CommentList = ({ postId }) => {
                   <strong>{comment.author?.username || "User"}</strong>:{" "}
                   {comment.content}
                 </li>
+                <li>Likes {comment.likes}</li>
+                <button onClick={() => likeComment(comment._id)}>
+                  Likes Comment
+                </button>
                 <button onClick={() => deleteComment(comment._id)}>
                   Delete Comment
                 </button>
                 <button onClick={() => toggleEdit(idx)}>Update Comment</button>
+                <button onClick={undoEdit}>X</button>
                 {showEdit === idx ? (
                   <div>
                     <input

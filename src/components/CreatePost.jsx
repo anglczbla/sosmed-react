@@ -150,7 +150,7 @@ const CreatePost = () => {
     },
     onSuccess: () => {
       alert("success add comment");
-      queryClient.invalidateQueries({ queryKey: ["post"] });
+      queryClient.invalidateQueries({ queryKey: ["comments"] });
       setComment({
         content: "",
       });
@@ -264,13 +264,13 @@ const CreatePost = () => {
           <div>
             {data.posts.map((d, index) => (
               <div key={d._id}>
-                <p>{d.content}</p>
+                <p>Content: {d.content}</p>
                 <p>
                   {d.images.map((i) => (
                     <img src={i.url} alt="" />
                   ))}
                 </p>
-                <p>Created By: {d.author.account.username}</p>
+                {/* <p>Created By: {d.author.account?.username}</p> */}
                 <p>Created at: {d.createdAt}</p>
                 <p>Likes: {d.likes}</p>
                 <p>Comment: {d.comments}</p>
