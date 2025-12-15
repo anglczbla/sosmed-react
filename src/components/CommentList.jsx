@@ -1,8 +1,13 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import axios from "axios";
+import { useState } from "react";
 
 const CommentList = ({ postId }) => {
   const queryClient = useQueryClient();
+  const [updateComments, setUpdateComments] = useState({
+    content: "",
+  });
+  const [showEdit, setShowEdit] = useState(null);
   const { data, isLoading, isError, error } = useQuery({
     queryKey: ["comments", postId],
     queryFn: async () => {
@@ -41,8 +46,46 @@ const CommentList = ({ postId }) => {
     },
   });
 
+  const updateCommentAPI = useMutation({
+    mutationFn: (data) => {
+      const { id, updateComments } = data;
+      const accessToken = localStorage.getItem("accessToken");
+      return axios.patch(
+        `https://api.freeapi.app/api/v1/social-media/comments/${id}`,
+        updateComments,
+        {
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+          },
+        }
+      );
+    },
+    onSuccess: () => {
+      alert("success edit comments");
+      queryClient.invalidateQueries({ queryKey: ["comments"] });
+      setShowEdit(null);
+    },
+    onError: (error) => {
+      console.error(error);
+    },
+  });
+
   const deleteComment = (id) => {
     deleteCommentAPI.mutate(id);
+  };
+
+  const handleEditComment = (e) => {
+    const { name, value } = e.target;
+    setUpdateComments({ ...updateComments, [name]: value });
+  };
+
+  const toggleEdit = (idx) => {
+    setShowEdit(idx);
+  };
+
+  const saveEditComment = (id, updateComments) => {
+    const data = { id, updateComments };
+    updateCommentAPI.mutate(data);
   };
 
   if (isLoading)
@@ -71,7 +114,7 @@ const CommentList = ({ postId }) => {
       ) : (
         <div>
           <ul style={{ listStyle: "none", padding: 0 }}>
-            {comments.map((comment) => (
+            {comments.map((comment, idx) => (
               <div>
                 <li
                   key={comment._id}
@@ -87,6 +130,25 @@ const CommentList = ({ postId }) => {
                 <button onClick={() => deleteComment(comment._id)}>
                   Delete Comment
                 </button>
+                <button onClick={() => toggleEdit(idx)}>Update Comment</button>
+                {showEdit === idx ? (
+                  <div>
+                    <input
+                      type="text"
+                      name="content"
+                      value={updateComments.content}
+                      placeholder="update comment"
+                      onChange={handleEditComment}
+                    />
+                    <button
+                      onClick={() =>
+                        saveEditComment(comment._id, updateComments)
+                      }
+                    >
+                      Save
+                    </button>
+                  </div>
+                ) : null}
               </div>
             ))}
           </ul>
