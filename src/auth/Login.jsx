@@ -1,8 +1,8 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import axios from "axios";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Helper from "../hooks/helper";
+import apiClient from "../utils/api";
 
 const Login = () => {
   const queryClient = useQueryClient();
@@ -23,8 +23,8 @@ const Login = () => {
   };
 
   const login = useMutation({
-    mutationFn: (login) => {
-      return axios.post("https://api.freeapi.app/api/v1/users/login", login);
+    mutationFn: (data) => {
+      return apiClient.post("users/login", data);
     },
     onSuccess: (data) => {
       alert("login success");
@@ -41,6 +41,7 @@ const Login = () => {
     },
     onError: (error) => {
       console.error(error);
+      alert(error.response?.data?.message || "Login failed");
     },
   });
 
@@ -72,7 +73,9 @@ const Login = () => {
           {showPassword ? "Hide" : "Show"}
         </button>
         <button type="submit">Login</button>
-        <button type="button" onClick={toggleRegist}>Not Registed?</button>
+        <button type="button" onClick={toggleRegist}>
+          Not Registed?
+        </button>
       </form>
     </div>
   );
