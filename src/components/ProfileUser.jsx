@@ -1,9 +1,10 @@
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { useParams } from "react-router-dom";
 import apiClient from "../utils/api";
 
 const ProfileUser = () => {
+  const queryClient = useQueryClient();
   const { username } = useParams();
   const [showFollowers, setShowFollowers] = useState(false);
   const [showFollowing, setShowFollowing] = useState(false);
@@ -18,6 +19,8 @@ const ProfileUser = () => {
       return response.data.data;
     },
   });
+
+  console.log("isi data user", data);
 
   // followers
   const {
@@ -51,12 +54,29 @@ const ProfileUser = () => {
     enabled: showFollowing,
   });
 
+  const followUserAPI = useMutation({
+    mutationFn: (userId) => {
+      return apiClient.post(`social-media/follow/${userId}`);
+    },
+    onSuccess: () => {
+      alert("success follow user");
+      queryClient.invalidateQueries({ queryKey: ["user"] });
+    },
+    onError: (error) => {
+      console.error(error);
+    },
+  });
+
   const toggleFollowers = () => {
     setShowFollowers(!showFollowers);
   };
 
   const toggleFollowing = () => {
     setShowFollowing(!showFollowing);
+  };
+
+  const followUser = (idUser) => {
+    followUserAPI.mutate(idUser);
   };
 
   if (isLoading)
@@ -82,6 +102,9 @@ const ProfileUser = () => {
       {/* followers */}
       <div>
         <p>Followers: {data.followersCount}</p>
+        <button onClick={() => followUser(data.account._id)}>
+          Follow user
+        </button>
         <button onClick={toggleFollowers}>
           {showFollowers ? "Hide Followers" : "See Followers"}
         </button>
