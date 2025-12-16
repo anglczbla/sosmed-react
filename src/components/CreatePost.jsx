@@ -111,9 +111,14 @@ const CreatePost = () => {
       const { postId, comment } = data;
       return apiClient.post(`/social-media/comments/post/${postId}`, comment);
     },
-    onSuccess: () => {
+    onSuccess: (data, variables) => {
+      console.log("isi variables", variables);
+
       alert("success add comment");
-      queryClient.invalidateQueries({ queryKey: ["comments"] });
+      queryClient.invalidateQueries({
+        queryKey: ["comments", variables.postId],
+      });
+      queryClient.invalidateQueries({ queryKey: ["post"] });
       setComment({
         content: "",
       });
@@ -129,6 +134,19 @@ const CreatePost = () => {
     },
     onSuccess: () => {
       alert("success like post");
+      queryClient.invalidateQueries({ queryKey: ["post"] });
+    },
+    onError: (error) => {
+      console.error(error);
+    },
+  });
+
+  const unlikesPostAPI = useMutation({
+    mutationFn: (id) => {
+      return apiClient.post(`/social-media/like/post/${id}`, {});
+    },
+    onSuccess: () => {
+      alert("success unlike post");
       queryClient.invalidateQueries({ queryKey: ["post"] });
     },
     onError: (error) => {
@@ -196,6 +214,10 @@ const CreatePost = () => {
     likesPostAPI.mutate(id);
   };
 
+  const unlikePost = (id) => {
+    unlikesPostAPI.mutate(id);
+  };
+
   return (
     <div>
       <form onSubmit={submitPost}>
@@ -261,6 +283,7 @@ const CreatePost = () => {
                 </button>
                 <p>Likes: {d.likes}</p>
                 <button onClick={() => likePost(d._id)}>Like Post</button>
+                <button onClick={() => unlikePost(d._id)}>Unlike Post</button>
                 <p>Comment: {d.comments}</p>
                 <button onClick={() => toggleComments(d._id)}>
                   {activeCommentId === d._id ? "Hide Comments" : "See Comments"}

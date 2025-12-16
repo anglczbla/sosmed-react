@@ -61,6 +61,19 @@ const CommentList = ({ postId }) => {
     },
   });
 
+  const unlikesCommentAPI = useMutation({
+    mutationFn: (id) => {
+      return apiClient.post(`/social-media/like/comment/${id}`, {});
+    },
+    onSuccess: () => {
+      alert("success unlikes comment");
+      queryClient.invalidateQueries({ queryKey: ["comments"] });
+    },
+    onError: (error) => {
+      console.error(error);
+    },
+  });
+
   const deleteComment = (id) => {
     deleteCommentAPI.mutate(id);
   };
@@ -85,6 +98,10 @@ const CommentList = ({ postId }) => {
 
   const likeComment = (id) => {
     likesCommentAPI.mutate(id);
+  };
+
+  const unlikesComment = (id) => {
+    unlikesCommentAPI.mutate(id);
   };
 
   if (isLoading)
@@ -129,7 +146,7 @@ const CommentList = ({ postId }) => {
                 <button onClick={() => likeComment(comment._id)}>
                   Likes Comment
                 </button>
-                <button onClick={() => likeComment(comment._id)}>
+                <button onClick={() => unlikesComment(comment._id)}>
                   Unlike Comment
                 </button>
                 <button onClick={() => deleteComment(comment._id)}>
