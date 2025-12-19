@@ -13,6 +13,8 @@ const Home = () => {
     content: "",
   });
   const [activeCommentId, setActiveCommentId] = useState(null);
+  
+  const accessToken = localStorage.getItem("accessToken");
 
   const { data, isLoading, isError } = useQuery({
     queryKey: ["post", page, limit],
@@ -76,9 +78,19 @@ const Home = () => {
     setComment({ ...comment, [name]: value });
   };
 
+  const checkAuth = () => {
+    if (!accessToken) {
+      navigate("/login");
+      return false;
+    }
+    return true;
+  };
+
   const addComment = (postId, comment) => {
-    const data = { postId, comment };
-    commentAPI.mutate(data);
+    if (checkAuth()) {
+      const data = { postId, comment };
+      commentAPI.mutate(data);
+    }
   };
 
   const toggleComments = (id) => {
@@ -86,11 +98,22 @@ const Home = () => {
   };
 
   const likePost = (id) => {
-    likesPostAPI.mutate(id);
+    if (checkAuth()) {
+      likesPostAPI.mutate(id);
+    }
   };
 
   const unlikePost = (id) => {
-    unlikesPostAPI.mutate(id);
+    if (checkAuth()) {
+      unlikesPostAPI.mutate(id);
+    }
+  };
+
+  const handleShareClick = (e) => {
+    if (!accessToken) {
+      e.preventDefault();
+      navigate("/login");
+    }
   };
 
   return (
@@ -102,6 +125,7 @@ const Home = () => {
             <p className="opacity-90 mb-6">See what's happening in your network right now.</p>
             <Link 
               to="/create-post" 
+              onClick={handleShareClick}
               className="px-6 py-2.5 bg-white text-purple-600 font-bold rounded-xl shadow-md hover:bg-gray-50 transition-all inline-block"
             >
               Share Something ✍️
@@ -205,23 +229,30 @@ const Home = () => {
                 {activeCommentId === d._id && (
                   <div className="mt-4 pt-4 border-t border-gray-100 animate-in fade-in slide-in-from-top-2 duration-200">
                     <CommentList postId={d._id} />
-                    <div className="mt-4 flex gap-2">
-                       <input
-                          type="text"
-                          name="content"
-                          value={comment.content}
-                          onChange={handleChangeComment}
-                          placeholder="Add a comment..."
-                          className="flex-1 px-4 py-2.5 rounded-2xl border border-gray-200 bg-gray-50/50 focus:bg-white focus:ring-2 focus:ring-purple-200 outline-none transition-all text-sm"
-                        />
-                        <button 
-                          onClick={() => addComment(d._id, comment)}
-                          disabled={!comment.content.trim()}
-                          className="px-5 py-2.5 bg-purple-600 text-white rounded-2xl text-sm font-bold hover:bg-purple-700 transition-colors shadow-sm disabled:opacity-50"
-                        >
-                          Send
-                        </button>
-                    </div>
+                    {accessToken && (
+                        <div className="mt-4 flex gap-2">
+                        <input
+                            type="text"
+                            name="content"
+                            value={comment.content}
+                            onChange={handleChangeComment}
+                            placeholder="Add a comment..."
+                            className="flex-1 px-4 py-2.5 rounded-2xl border border-gray-200 bg-gray-50/50 focus:bg-white focus:ring-2 focus:ring-purple-200 outline-none transition-all text-sm"
+                            />
+                            <button 
+                            onClick={() => addComment(d._id, comment)}
+                            disabled={!comment.content.trim()}
+                            className="px-5 py-2.5 bg-purple-600 text-white rounded-2xl text-sm font-bold hover:bg-purple-700 transition-colors shadow-sm disabled:opacity-50"
+                            >
+                            Send
+                            </button>
+                        </div>
+                    )}
+                    {!accessToken && (
+                        <div className="mt-4 text-center p-4 bg-gray-50 rounded-xl text-sm text-gray-500">
+                            Please <Link to="/login" className="text-purple-600 font-bold hover:underline">login</Link> to add a comment.
+                        </div>
+                    )}
                   </div>
                 )}
 

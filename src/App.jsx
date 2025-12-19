@@ -17,11 +17,11 @@ function App() {
       <QueryClientProvider client={queryClient}>
         <AuthProvider>
           <Routes>
-            <Route path="/" element={<Register />} />
+            <Route path="/register" element={<Register />} />
             <Route path="/login" element={<Login />} />
 
             <Route element={<ProtectedNavbar />}>
-              <Route path="/home" element={<Home />} />
+              <Route path="/" element={<Home />} />
               <Route path="/profile" element={<Profile />} />
               <Route path="/create-post" element={<CreatePost />} />
               <Route path="/user-profile/:username" element={<ProfileUser />} />
