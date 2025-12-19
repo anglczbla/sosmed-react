@@ -1,4 +1,4 @@
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Helper from "../hooks/helper";
@@ -6,6 +6,7 @@ import apiClient from "../utils/api";
 
 const Login = () => {
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const { showPassword, toggleShowPassword } = Helper();
   const [formLogin, setFormLogin] = useState({
     username: "",
@@ -32,6 +33,9 @@ const Login = () => {
 
       localStorage.setItem("accessToken", accessToken);
       localStorage.setItem("user", JSON.stringify(user));
+
+      queryClient.invalidateQueries();
+
       navigate("/home");
       setFormLogin({
         username: "",
@@ -53,13 +57,22 @@ const Login = () => {
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-indigo-100 via-purple-100 to-pink-100 p-4">
       <div className="bg-white/80 backdrop-blur-xl p-8 rounded-3xl shadow-2xl w-full max-w-md border border-white/50">
         <div className="text-center mb-8">
-          <h2 className="text-3xl font-extrabold text-gray-800 tracking-tight">Welcome Back! ✨</h2>
-          <p className="text-gray-500 mt-2 text-sm">Please login to your account</p>
+          <h2 className="text-3xl font-extrabold text-gray-800 tracking-tight">
+            Welcome Back! ✨
+          </h2>
+          <p className="text-gray-500 mt-2 text-sm">
+            Please login to your account
+          </p>
         </div>
-        
+
         <form onSubmit={submitLogin} className="space-y-6">
           <div className="space-y-2">
-            <label htmlFor="username" className="text-sm font-semibold text-gray-700 ml-1">Username</label>
+            <label
+              htmlFor="username"
+              className="text-sm font-semibold text-gray-700 ml-1"
+            >
+              Username
+            </label>
             <input
               type="text"
               name="username"
@@ -71,7 +84,12 @@ const Login = () => {
           </div>
 
           <div className="space-y-2">
-            <label htmlFor="password" className="text-sm font-semibold text-gray-700 ml-1">Password</label>
+            <label
+              htmlFor="password"
+              className="text-sm font-semibold text-gray-700 ml-1"
+            >
+              Password
+            </label>
             <div className="relative">
               <input
                 type={showPassword ? "text" : "password"}

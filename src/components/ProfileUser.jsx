@@ -9,7 +9,9 @@ const ProfileUser = () => {
   const [showFollowers, setShowFollowers] = useState(false);
   const [showFollowing, setShowFollowing] = useState(false);
 
-  // profile user
+  const userString = localStorage.getItem("user");
+  const loggedInUser = userString ? JSON.parse(userString) : null;
+
   const { data, isLoading, isError, error } = useQuery({
     queryKey: ["user", username],
     queryFn: async () => {
@@ -19,6 +21,11 @@ const ProfileUser = () => {
       return response.data.data;
     },
   });
+
+  const isOwnProfile =
+    loggedInUser &&
+    (loggedInUser.username === username ||
+      loggedInUser.account?.username === username);
 
   console.log("isi data user", data);
 
@@ -126,19 +133,23 @@ const ProfileUser = () => {
               />
             </div>
 
-            <button
-              onClick={() => followUser(data.account._id)}
-              className="mb-4 px-8 py-3 bg-gradient-to-r from-purple-600 to-pink-500 text-white font-bold rounded-xl shadow-lg hover:shadow-xl hover:scale-105 transition-all"
-            >
-              Follow ✨
-            </button>
+            {!isOwnProfile && (
+              <div className="flex gap-2">
+                <button
+                  onClick={() => followUser(data.account._id)}
+                  className="mb-4 px-6 py-3 bg-gradient-to-r from-purple-600 to-pink-500 text-white font-bold rounded-xl shadow-lg hover:shadow-xl hover:scale-105 transition-all"
+                >
+                  Follow ✨
+                </button>
 
-            <button
-              onClick={() => unfollowUser(data.account._id)}
-              className="mb-4 px-8 py-3 bg-gradient-to-r from-purple-600 to-pink-500 text-white font-bold rounded-xl shadow-lg hover:shadow-xl hover:scale-105 transition-all"
-            >
-              UnFollow ✨
-            </button>
+                <button
+                  onClick={() => unfollowUser(data.account._id)}
+                  className="mb-4 px-6 py-3 bg-gray-100 text-gray-700 font-bold rounded-xl shadow-md hover:bg-gray-200 transition-all border border-gray-200"
+                >
+                  Unfollow
+                </button>
+              </div>
+            )}
           </div>
 
           <div className="mb-6">
