@@ -3,9 +3,11 @@ import Navbar from "./Navbar";
 
 const ProtectedNavbar = () => {
   return (
-    <div>
+    <div className="min-h-screen bg-gray-50">
       <Navbar />
-      <Outlet />
+      <div className="pt-20 pb-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <Outlet />
+      </div>
     </div>
   );
 };

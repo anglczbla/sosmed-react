@@ -105,10 +105,10 @@ const CommentList = ({ postId }) => {
   };
 
   if (isLoading)
-    return <p className="text-sm text-gray-500">Loading comments...</p>;
+    return <p className="text-sm text-gray-500 py-2">Loading comments...</p>;
   if (isError)
     return (
-      <p className="text-sm text-red-500">
+      <p className="text-sm text-red-500 py-2">
         Error loading comments: {error.message}
       </p>
     );
@@ -116,66 +116,62 @@ const CommentList = ({ postId }) => {
   const comments = data?.comments || [];
 
   return (
-    <div
-      style={{
-        marginTop: "10px",
-        padding: "10px",
-        backgroundColor: "#f9f9f9",
-        borderRadius: "5px",
-      }}
-    >
-      <h4>Comments</h4>
+    <div className="space-y-4 mt-2">
+      <h4 className="text-sm font-bold text-gray-700">Comments ({comments.length})</h4>
       {comments.length === 0 ? (
-        <p>No comments yet.</p>
+        <p className="text-sm text-gray-400 italic">No comments yet.</p>
       ) : (
-        <div>
-          <ul style={{ listStyle: "none", padding: 0 }}>
-            {comments.map((comment, idx) => (
-              <div key={comment._id}>
-                <li
-                  style={{
-                    marginBottom: "8px",
-                    borderBottom: "1px solid #eee",
-                    paddingBottom: "4px",
-                  }}
-                >
-                  <strong>{comment.author?.username || "User"}</strong>:{" "}
-                  {comment.content}
-                </li>
-                <li>Likes {comment.likes}</li>
-                <button onClick={() => likeComment(comment._id)}>
-                  Likes Comment
-                </button>
-                <button onClick={() => unlikesComment(comment._id)}>
-                  Unlike Comment
-                </button>
-                <button onClick={() => deleteComment(comment._id)}>
-                  Delete Comment
-                </button>
-                <button onClick={() => toggleEdit(idx)}>Update Comment</button>
-                <button onClick={undoEdit}>X</button>
-                {showEdit === idx ? (
-                  <div>
-                    <input
-                      type="text"
-                      name="content"
-                      value={updateComments.content}
-                      placeholder="update comment"
-                      onChange={handleEditComment}
-                    />
-                    <button
-                      onClick={() =>
-                        saveEditComment(comment._id, updateComments)
-                      }
-                    >
-                      Save
-                    </button>
+        <ul className="space-y-4">
+          {comments.map((comment, idx) => (
+            <li key={comment._id} className="group bg-gray-50 rounded-2xl p-4 hover:bg-white border border-transparent hover:border-gray-100 transition-all">
+              <div className="flex justify-between items-start">
+                <div className="flex-1">
+                  <div className="flex items-center gap-2 mb-1">
+                    <span className="font-bold text-sm text-gray-800">{comment.author?.username || "User"}</span>
+                    <span className="text-xs text-gray-400">• {comment.likes} likes</span>
                   </div>
-                ) : null}
+                  
+                  {showEdit === idx ? (
+                    <div className="flex gap-2 mt-2">
+                      <input
+                        type="text"
+                        name="content"
+                        value={updateComments.content}
+                        placeholder="update comment"
+                        onChange={handleEditComment}
+                        className="flex-1 px-3 py-1 text-sm border border-purple-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-purple-400"
+                      />
+                      <button
+                        onClick={() => saveEditComment(comment._id, updateComments)}
+                        className="text-xs bg-purple-600 text-white px-3 py-1 rounded-lg hover:bg-purple-700"
+                      >
+                        Save
+                      </button>
+                      <button onClick={undoEdit} className="text-xs text-gray-500 hover:text-gray-700">Cancel</button>
+                    </div>
+                  ) : (
+                    <p className="text-sm text-gray-600 leading-relaxed">{comment.content}</p>
+                  )}
+                </div>
               </div>
-            ))}
-          </ul>
-        </div>
+
+              <div className="flex gap-3 mt-3 opacity-0 group-hover:opacity-100 transition-opacity">
+                <button onClick={() => likeComment(comment._id)} className="text-xs font-semibold text-pink-500 hover:text-pink-600">
+                  Like
+                </button>
+                <button onClick={() => unlikesComment(comment._id)} className="text-xs font-semibold text-gray-400 hover:text-gray-600">
+                  Unlike
+                </button>
+                <button onClick={() => toggleEdit(idx)} className="text-xs font-semibold text-blue-500 hover:text-blue-600">
+                  Edit
+                </button>
+                <button onClick={() => deleteComment(comment._id)} className="text-xs font-semibold text-red-400 hover:text-red-500">
+                  Delete
+                </button>
+              </div>
+            </li>
+          ))}
+        </ul>
       )}
     </div>
   );
