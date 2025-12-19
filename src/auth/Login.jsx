@@ -14,7 +14,7 @@ const Login = () => {
   });
 
   const toggleRegist = () => {
-    navigate("/");
+    navigate("/register");
   };
 
   const handleFormLogin = (e) => {
@@ -36,7 +36,7 @@ const Login = () => {
 
       queryClient.invalidateQueries();
 
-      navigate("/home");
+      navigate("/");
       setFormLogin({
         username: "",
         password: "",

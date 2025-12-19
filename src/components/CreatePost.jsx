@@ -292,9 +292,17 @@ const CreatePost = () => {
                 {/* Header */}
                 <div className="flex justify-between items-start mb-4">
                   <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-full bg-gradient-to-br from-purple-200 to-pink-200 flex items-center justify-center text-purple-700 font-bold">
-                       {d.author.account.username.charAt(0).toUpperCase()}
-                    </div>
+                    {d.author.account.avatar?.url ? (
+                      <img
+                        src={d.author.account.avatar.url}
+                        alt={d.author.account.username}
+                        className="w-10 h-10 rounded-full object-cover border border-gray-100 shadow-sm"
+                      />
+                    ) : (
+                      <div className="w-10 h-10 rounded-full bg-gradient-to-br from-purple-200 to-pink-200 flex items-center justify-center text-purple-700 font-bold">
+                         {d.author.account.username.charAt(0).toUpperCase()}
+                      </div>
+                    )}
                     <div>
                         <button
                           onClick={() =>
