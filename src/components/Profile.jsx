@@ -2,6 +2,25 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import apiClient from "../utils/api";
 
+const getValidationErrors = (error) => {
+  if (error?.response?.status === 422 && error?.response?.data?.errors) {
+    const errors = error.response.data.errors;
+    const formattedErrors = {};
+
+    errors.forEach((errorObj) => {
+      const field = Object.keys(errorObj)[0];
+      const message = errorObj[field];
+
+      if (!formattedErrors[field]) {
+        formattedErrors[field] = message;
+      }
+    });
+
+    return formattedErrors;
+  }
+  return {};
+};
+
 const Profile = () => {
   const [formEdit, setFormEdit] = useState({
     bio: "",
@@ -15,7 +34,6 @@ const Profile = () => {
   const [showFormEdit, setShowFormEdit] = useState(null);
   const [showFollowers, setShowFollowers] = useState(false);
   const [showFollowing, setShowFollowing] = useState(false);
-  const [validationErrors, setValidationErrors] = useState({});
 
   const queryClient = useQueryClient();
 
@@ -91,27 +109,11 @@ const Profile = () => {
         location: "",
         phoneNumber: "",
       });
-      setValidationErrors({});
       setShowFormEdit(null);
     },
     onError: (error) => {
       console.error(error);
-
-      if (error.response?.status === 422 && error.response?.data?.errors) {
-        const errors = error.response.data.errors;
-        const formattedErrors = {};
-
-        errors.forEach((errorObj) => {
-          const field = Object.keys(errorObj)[0];
-          const message = errorObj[field];
-
-          if (!formattedErrors[field]) {
-            formattedErrors[field] = message;
-          }
-        });
-
-        setValidationErrors(formattedErrors);
-      } else {
+      if (error.response?.status !== 422) {
         alert("An error occurred while updating profile");
       }
     },
@@ -132,8 +134,9 @@ const Profile = () => {
     const { name, value } = e.target;
     setFormEdit({ ...formEdit, [name]: value });
 
-    if (validationErrors[name]) {
-      setValidationErrors({ ...validationErrors, [name]: null });
+    // Clear validation error for this field when user starts typing
+    if (updateProfileAPI.error) {
+      updateProfileAPI.reset();
     }
   };
 
@@ -164,8 +167,8 @@ const Profile = () => {
 
   const showEditForm = () => {
     setShowFormEdit(!showFormEdit);
-    if (!showFormEdit) {
-      setValidationErrors({});
+    if (!showFormEdit && updateProfileAPI.error) {
+      updateProfileAPI.reset();
     }
   };
 
@@ -320,15 +323,20 @@ const Profile = () => {
                           value={formEdit.firstName}
                           onChange={handleEdit}
                           className={`w-full px-4 py-2 rounded-xl border ${
-                            validationErrors.firstName
+                            getValidationErrors(updateProfileAPI.error)
+                              .firstName
                               ? "border-red-400 focus:ring-red-400"
                               : "border-gray-200 focus:ring-purple-400"
                           } focus:ring-2 outline-none`}
                           placeholder="First Name"
                         />
-                        {validationErrors.firstName && (
+                        {getValidationErrors(updateProfileAPI.error)
+                          .firstName && (
                           <p className="text-xs text-red-500 mt-1">
-                            {validationErrors.firstName}
+                            {
+                              getValidationErrors(updateProfileAPI.error)
+                                .firstName
+                            }
                           </p>
                         )}
                       </div>
@@ -342,15 +350,19 @@ const Profile = () => {
                           value={formEdit.lastName}
                           onChange={handleEdit}
                           className={`w-full px-4 py-2 rounded-xl border ${
-                            validationErrors.lastName
+                            getValidationErrors(updateProfileAPI.error).lastName
                               ? "border-red-400 focus:ring-red-400"
                               : "border-gray-200 focus:ring-purple-400"
                           } focus:ring-2 outline-none`}
                           placeholder="Last Name"
                         />
-                        {validationErrors.lastName && (
+                        {getValidationErrors(updateProfileAPI.error)
+                          .lastName && (
                           <p className="text-xs text-red-500 mt-1">
-                            {validationErrors.lastName}
+                            {
+                              getValidationErrors(updateProfileAPI.error)
+                                .lastName
+                            }
                           </p>
                         )}
                       </div>
@@ -365,15 +377,15 @@ const Profile = () => {
                         value={formEdit.bio}
                         onChange={handleEdit}
                         className={`w-full px-4 py-2 rounded-xl border ${
-                          validationErrors.bio
+                          getValidationErrors(updateProfileAPI.error).bio
                             ? "border-red-400 focus:ring-red-400"
                             : "border-gray-200 focus:ring-purple-400"
                         } focus:ring-2 outline-none h-24 resize-none`}
                         placeholder="Tell us about yourself..."
                       />
-                      {validationErrors.bio && (
+                      {getValidationErrors(updateProfileAPI.error).bio && (
                         <p className="text-xs text-red-500 mt-1">
-                          {validationErrors.bio}
+                          {getValidationErrors(updateProfileAPI.error).bio}
                         </p>
                       )}
                     </div>
@@ -388,15 +400,15 @@ const Profile = () => {
                         value={formEdit.location}
                         onChange={handleEdit}
                         className={`w-full px-4 py-2 rounded-xl border ${
-                          validationErrors.location
+                          getValidationErrors(updateProfileAPI.error).location
                             ? "border-red-400 focus:ring-red-400"
                             : "border-gray-200 focus:ring-purple-400"
                         } focus:ring-2 outline-none`}
                         placeholder="City, Country"
                       />
-                      {validationErrors.location && (
+                      {getValidationErrors(updateProfileAPI.error).location && (
                         <p className="text-xs text-red-500 mt-1">
-                          {validationErrors.location}
+                          {getValidationErrors(updateProfileAPI.error).location}
                         </p>
                       )}
                     </div>
@@ -412,15 +424,20 @@ const Profile = () => {
                           value={formEdit.phoneNumber}
                           onChange={handleEdit}
                           className={`w-full px-4 py-2 rounded-xl border ${
-                            validationErrors.phoneNumber
+                            getValidationErrors(updateProfileAPI.error)
+                              .phoneNumber
                               ? "border-red-400 focus:ring-red-400"
                               : "border-gray-200 focus:ring-purple-400"
                           } focus:ring-2 outline-none`}
                           placeholder="+123456789"
                         />
-                        {validationErrors.phoneNumber && (
+                        {getValidationErrors(updateProfileAPI.error)
+                          .phoneNumber && (
                           <p className="text-xs text-red-500 mt-1">
-                            {validationErrors.phoneNumber}
+                            {
+                              getValidationErrors(updateProfileAPI.error)
+                                .phoneNumber
+                            }
                           </p>
                         )}
                       </div>
@@ -434,15 +451,20 @@ const Profile = () => {
                           value={formEdit.countryCode}
                           onChange={handleEdit}
                           className={`w-full px-4 py-2 rounded-xl border ${
-                            validationErrors.countryCode
+                            getValidationErrors(updateProfileAPI.error)
+                              .countryCode
                               ? "border-red-400 focus:ring-red-400"
                               : "border-gray-200 focus:ring-purple-400"
                           } focus:ring-2 outline-none`}
                           placeholder="+62"
                         />
-                        {validationErrors.countryCode && (
+                        {getValidationErrors(updateProfileAPI.error)
+                          .countryCode && (
                           <p className="text-xs text-red-500 mt-1">
-                            {validationErrors.countryCode}
+                            {
+                              getValidationErrors(updateProfileAPI.error)
+                                .countryCode
+                            }
                           </p>
                         )}
                       </div>
@@ -458,14 +480,14 @@ const Profile = () => {
                         value={formEdit.dob}
                         onChange={handleEdit}
                         className={`w-full px-4 py-2 rounded-xl border ${
-                          validationErrors.dob
+                          getValidationErrors(updateProfileAPI.error).dob
                             ? "border-red-400 focus:ring-red-400"
                             : "border-gray-200 focus:ring-purple-400"
                         } focus:ring-2 outline-none`}
                       />
-                      {validationErrors.dob && (
+                      {getValidationErrors(updateProfileAPI.error).dob && (
                         <p className="text-xs text-red-500 mt-1">
-                          {validationErrors.dob}
+                          {getValidationErrors(updateProfileAPI.error).dob}
                         </p>
                       )}
                     </div>

@@ -4,6 +4,25 @@ import { useNavigate } from "react-router-dom";
 import apiClient from "../utils/api";
 import CommentList from "./CommentList";
 
+const getValidationErrors = (error) => {
+  if (error?.response?.status === 422 && error?.response?.data?.errors) {
+    const errors = error.response.data.errors;
+    const formattedErrors = {};
+
+    errors.forEach((errorObj) => {
+      const field = Object.keys(errorObj)[0];
+      const message = errorObj[field];
+
+      if (!formattedErrors[field]) {
+        formattedErrors[field] = message;
+      }
+    });
+
+    return formattedErrors;
+  }
+  return {};
+};
+
 const CreatePost = () => {
   const queryClient = useQueryClient();
   const navigate = useNavigate();
@@ -28,8 +47,6 @@ const CreatePost = () => {
   const [activeCommentId, setActiveCommentId] = useState(null);
   const [showProfile, setShowProfile] = useState(false);
   const [selectedUsername, setSelectedUsername] = useState(null);
-  const [validationErrors, setValidationErrors] = useState({});
-  const [editValidationErrors, setEditValidationErrors] = useState({});
 
   const { data, isLoading, isError } = useQuery({
     queryKey: ["post", page, limit],
@@ -73,26 +90,10 @@ const CreatePost = () => {
         "tags[2]": "",
       });
       setImages([]);
-      setValidationErrors({});
     },
     onError: (error) => {
       console.error(error);
-
-      if (error.response?.status === 422 && error.response?.data?.errors) {
-        const errors = error.response.data.errors;
-        const formattedErrors = {};
-
-        errors.forEach((errorObj) => {
-          const field = Object.keys(errorObj)[0];
-          const message = errorObj[field];
-
-          if (!formattedErrors[field]) {
-            formattedErrors[field] = message;
-          }
-        });
-
-        setValidationErrors(formattedErrors);
-      } else {
+      if (error.response?.status !== 422) {
         alert("An error occurred while creating post");
       }
     },
@@ -116,26 +117,10 @@ const CreatePost = () => {
       });
       setEditImages([]);
       setShowEditForm(null);
-      setEditValidationErrors({});
     },
     onError: (error) => {
       console.error(error);
-
-      if (error.response?.status === 422 && error.response?.data?.errors) {
-        const errors = error.response.data.errors;
-        const formattedErrors = {};
-
-        errors.forEach((errorObj) => {
-          const field = Object.keys(errorObj)[0];
-          const message = errorObj[field];
-
-          if (!formattedErrors[field]) {
-            formattedErrors[field] = message;
-          }
-        });
-
-        setEditValidationErrors(formattedErrors);
-      } else {
+      if (error.response?.status !== 422) {
         alert("An error occurred while updating post");
       }
     },
@@ -217,7 +202,7 @@ const CreatePost = () => {
 
   console.log("isi data", data);
 
-  // Check if current user is the post author
+  // Check if current user is the post owner
   const isPostOwner = (postAuthorId) => {
     return currentUser?.account?._id === postAuthorId;
   };
@@ -226,9 +211,9 @@ const CreatePost = () => {
     const { name, value } = e.target;
     setFormPost({ ...formPost, [name]: value });
 
-    // Clear validation error for this field when user starts typing
-    if (validationErrors[name]) {
-      setValidationErrors({ ...validationErrors, [name]: null });
+    // Reset error when user types
+    if (createPost.error) {
+      createPost.reset();
     }
   };
 
@@ -240,9 +225,8 @@ const CreatePost = () => {
     const { name, value } = e.target;
     setEditPost({ ...editPost, [name]: value });
 
-    // Clear validation error for this field when user starts typing
-    if (editValidationErrors[name]) {
-      setEditValidationErrors({ ...editValidationErrors, [name]: null });
+    if (updatePostAPI.error) {
+      updatePostAPI.reset();
     }
   };
 
@@ -257,7 +241,9 @@ const CreatePost = () => {
 
   const toggleShowEditPost = (index) => {
     setShowEditForm(index);
-    setEditValidationErrors({});
+    if (updatePostAPI.error) {
+      updatePostAPI.reset();
+    }
   };
 
   const submitPost = (e) => {
@@ -307,14 +293,14 @@ const CreatePost = () => {
               onChange={handleFormPost}
               placeholder="What's on your mind?"
               className={`w-full px-4 py-3 rounded-xl border ${
-                validationErrors.content
+                getValidationErrors(createPost.error).content
                   ? "border-red-400 focus:ring-red-400"
                   : "border-gray-200 focus:ring-purple-400"
               } focus:ring-2 focus:border-transparent outline-none resize-none h-24 bg-gray-50/50`}
             />
-            {validationErrors.content && (
+            {getValidationErrors(createPost.error).content && (
               <p className="text-xs text-red-500 mt-1">
-                {validationErrors.content}
+                {getValidationErrors(createPost.error).content}
               </p>
             )}
           </div>
@@ -329,9 +315,9 @@ const CreatePost = () => {
                 onChange={handleImage}
                 className="w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-purple-50 file:text-purple-700 hover:file:bg-purple-100"
               />
-              {validationErrors.images && (
+              {getValidationErrors(createPost.error).images && (
                 <p className="text-xs text-red-500 mt-1">
-                  {validationErrors.images}
+                  {getValidationErrors(createPost.error).images}
                 </p>
               )}
             </div>
@@ -454,14 +440,14 @@ const CreatePost = () => {
                           placeholder="Edit content..."
                           onChange={handleEditPost}
                           className={`w-full px-3 py-2 rounded-lg border ${
-                            editValidationErrors.content
+                            getValidationErrors(updatePostAPI.error).content
                               ? "border-red-400 focus:ring-red-400"
                               : "border-gray-200 focus:ring-blue-400"
                           } text-sm focus:outline-none focus:ring-1`}
                         />
-                        {editValidationErrors.content && (
+                        {getValidationErrors(updatePostAPI.error).content && (
                           <p className="text-xs text-red-500 mt-1">
-                            {editValidationErrors.content}
+                            {getValidationErrors(updatePostAPI.error).content}
                           </p>
                         )}
                       </div>
@@ -484,9 +470,9 @@ const CreatePost = () => {
                           onChange={handleEditImage}
                           className="text-xs text-gray-500"
                         />
-                        {editValidationErrors.images && (
+                        {getValidationErrors(updatePostAPI.error).images && (
                           <p className="text-xs text-red-500 mt-1">
-                            {editValidationErrors.images}
+                            {getValidationErrors(updatePostAPI.error).images}
                           </p>
                         )}
                       </div>
