@@ -15,6 +15,7 @@ const Profile = () => {
   const [showFormEdit, setShowFormEdit] = useState(null);
   const [showFollowers, setShowFollowers] = useState(false);
   const [showFollowing, setShowFollowing] = useState(false);
+  const [validationErrors, setValidationErrors] = useState({});
 
   const queryClient = useQueryClient();
 
@@ -90,10 +91,29 @@ const Profile = () => {
         location: "",
         phoneNumber: "",
       });
+      setValidationErrors({});
       setShowFormEdit(null);
     },
     onError: (error) => {
       console.error(error);
+
+      if (error.response?.status === 422 && error.response?.data?.errors) {
+        const errors = error.response.data.errors;
+        const formattedErrors = {};
+
+        errors.forEach((errorObj) => {
+          const field = Object.keys(errorObj)[0];
+          const message = errorObj[field];
+
+          if (!formattedErrors[field]) {
+            formattedErrors[field] = message;
+          }
+        });
+
+        setValidationErrors(formattedErrors);
+      } else {
+        alert("An error occurred while updating profile");
+      }
     },
   });
 
@@ -111,6 +131,10 @@ const Profile = () => {
   const handleEdit = (e) => {
     const { name, value } = e.target;
     setFormEdit({ ...formEdit, [name]: value });
+
+    if (validationErrors[name]) {
+      setValidationErrors({ ...validationErrors, [name]: null });
+    }
   };
 
   const toggleFollowers = () => {
@@ -140,6 +164,9 @@ const Profile = () => {
 
   const showEditForm = () => {
     setShowFormEdit(!showFormEdit);
+    if (!showFormEdit) {
+      setValidationErrors({});
+    }
   };
 
   const updateProfile = (formEdit) => {
@@ -292,9 +319,18 @@ const Profile = () => {
                           name="firstName"
                           value={formEdit.firstName}
                           onChange={handleEdit}
-                          className="w-full px-4 py-2 rounded-xl border border-gray-200 focus:ring-2 focus:ring-purple-400 outline-none"
+                          className={`w-full px-4 py-2 rounded-xl border ${
+                            validationErrors.firstName
+                              ? "border-red-400 focus:ring-red-400"
+                              : "border-gray-200 focus:ring-purple-400"
+                          } focus:ring-2 outline-none`}
                           placeholder="First Name"
                         />
+                        {validationErrors.firstName && (
+                          <p className="text-xs text-red-500 mt-1">
+                            {validationErrors.firstName}
+                          </p>
+                        )}
                       </div>
                       <div className="space-y-1">
                         <label className="text-xs font-bold text-gray-500 uppercase">
@@ -305,9 +341,18 @@ const Profile = () => {
                           name="lastName"
                           value={formEdit.lastName}
                           onChange={handleEdit}
-                          className="w-full px-4 py-2 rounded-xl border border-gray-200 focus:ring-2 focus:ring-purple-400 outline-none"
+                          className={`w-full px-4 py-2 rounded-xl border ${
+                            validationErrors.lastName
+                              ? "border-red-400 focus:ring-red-400"
+                              : "border-gray-200 focus:ring-purple-400"
+                          } focus:ring-2 outline-none`}
                           placeholder="Last Name"
                         />
+                        {validationErrors.lastName && (
+                          <p className="text-xs text-red-500 mt-1">
+                            {validationErrors.lastName}
+                          </p>
+                        )}
                       </div>
                     </div>
 
@@ -319,9 +364,18 @@ const Profile = () => {
                         name="bio"
                         value={formEdit.bio}
                         onChange={handleEdit}
-                        className="w-full px-4 py-2 rounded-xl border border-gray-200 focus:ring-2 focus:ring-purple-400 outline-none h-24 resize-none"
+                        className={`w-full px-4 py-2 rounded-xl border ${
+                          validationErrors.bio
+                            ? "border-red-400 focus:ring-red-400"
+                            : "border-gray-200 focus:ring-purple-400"
+                        } focus:ring-2 outline-none h-24 resize-none`}
                         placeholder="Tell us about yourself..."
                       />
+                      {validationErrors.bio && (
+                        <p className="text-xs text-red-500 mt-1">
+                          {validationErrors.bio}
+                        </p>
+                      )}
                     </div>
 
                     <div className="space-y-1">
@@ -333,9 +387,18 @@ const Profile = () => {
                         name="location"
                         value={formEdit.location}
                         onChange={handleEdit}
-                        className="w-full px-4 py-2 rounded-xl border border-gray-200 focus:ring-2 focus:ring-purple-400 outline-none"
+                        className={`w-full px-4 py-2 rounded-xl border ${
+                          validationErrors.location
+                            ? "border-red-400 focus:ring-red-400"
+                            : "border-gray-200 focus:ring-purple-400"
+                        } focus:ring-2 outline-none`}
                         placeholder="City, Country"
                       />
+                      {validationErrors.location && (
+                        <p className="text-xs text-red-500 mt-1">
+                          {validationErrors.location}
+                        </p>
+                      )}
                     </div>
 
                     <div className="grid grid-cols-2 gap-4">
@@ -344,26 +407,44 @@ const Profile = () => {
                           Phone
                         </label>
                         <input
-                          type="phone"
+                          type="text"
                           name="phoneNumber"
                           value={formEdit.phoneNumber}
                           onChange={handleEdit}
-                          className="w-full px-4 py-2 rounded-xl border border-gray-200 focus:ring-2 focus:ring-purple-400 outline-none"
+                          className={`w-full px-4 py-2 rounded-xl border ${
+                            validationErrors.phoneNumber
+                              ? "border-red-400 focus:ring-red-400"
+                              : "border-gray-200 focus:ring-purple-400"
+                          } focus:ring-2 outline-none`}
                           placeholder="+123456789"
                         />
+                        {validationErrors.phoneNumber && (
+                          <p className="text-xs text-red-500 mt-1">
+                            {validationErrors.phoneNumber}
+                          </p>
+                        )}
                       </div>
                       <div className="space-y-1">
                         <label className="text-xs font-bold text-gray-500 uppercase">
                           Country Code
                         </label>
                         <input
-                          type="phone"
+                          type="text"
                           name="countryCode"
                           value={formEdit.countryCode}
                           onChange={handleEdit}
-                          className="w-full px-4 py-2 rounded-xl border border-gray-200 focus:ring-2 focus:ring-purple-400 outline-none"
+                          className={`w-full px-4 py-2 rounded-xl border ${
+                            validationErrors.countryCode
+                              ? "border-red-400 focus:ring-red-400"
+                              : "border-gray-200 focus:ring-purple-400"
+                          } focus:ring-2 outline-none`}
                           placeholder="+62"
                         />
+                        {validationErrors.countryCode && (
+                          <p className="text-xs text-red-500 mt-1">
+                            {validationErrors.countryCode}
+                          </p>
+                        )}
                       </div>
                     </div>
 
@@ -376,15 +457,27 @@ const Profile = () => {
                         name="dob"
                         value={formEdit.dob}
                         onChange={handleEdit}
-                        className="w-full px-4 py-2 rounded-xl border border-gray-200 focus:ring-2 focus:ring-purple-400 outline-none"
+                        className={`w-full px-4 py-2 rounded-xl border ${
+                          validationErrors.dob
+                            ? "border-red-400 focus:ring-red-400"
+                            : "border-gray-200 focus:ring-purple-400"
+                        } focus:ring-2 outline-none`}
                       />
+                      {validationErrors.dob && (
+                        <p className="text-xs text-red-500 mt-1">
+                          {validationErrors.dob}
+                        </p>
+                      )}
                     </div>
 
                     <button
                       onClick={() => updateProfile(formEdit)}
-                      className="w-full mt-4 py-3 bg-purple-600 text-white font-bold rounded-xl hover:bg-purple-700 shadow-lg transition-all"
+                      disabled={updateProfileAPI.isPending}
+                      className="w-full mt-4 py-3 bg-purple-600 text-white font-bold rounded-xl hover:bg-purple-700 shadow-lg transition-all disabled:bg-gray-400 disabled:cursor-not-allowed"
                     >
-                      Save Changes
+                      {updateProfileAPI.isPending
+                        ? "Saving..."
+                        : "Save Changes"}
                     </button>
                   </div>
                 </div>

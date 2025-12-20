@@ -4,13 +4,13 @@ import "./App.css";
 import Login from "./auth/Login";
 import Register from "./auth/Register";
 import CreatePost from "./components/CreatePost";
-import GuestRoute from "./components/GuestRoute";
 import Home from "./components/Home";
 import Profile from "./components/Profile";
 import ProfileUser from "./components/ProfileUser";
-import ProtectedNavbar from "./components/ProtectedNavbar";
-import ProtectedRoute from "./components/ProtectedRoute";
 import AuthProvider from "./context/AuthContext";
+import GuestRoute from "./route/GuestRoute";
+import ProtectedNavbar from "./route/ProtectedNavbar";
+import ProtectedRoute from "./route/ProtectedRoute";
 
 function App() {
   const queryClient = new QueryClient();

@@ -16,7 +16,7 @@ const Home = () => {
   
   const accessToken = localStorage.getItem("accessToken");
 
-  const { data, isLoading, isError } = useQuery({
+  const { data, isLoading, isError, error } = useQuery({
     queryKey: ["post", page, limit],
     queryFn: async () => {
       const response = await apiClient.get(
@@ -71,7 +71,7 @@ const Home = () => {
   });
 
   if (isLoading) return <div className="text-center py-20 text-gray-500 font-medium">Loading feed...</div>;
-  if (isError) return <div className="text-center py-20 text-red-500 font-medium">An error has occurred</div>;
+  if (isError) return <div className="text-center py-20 text-red-500 font-medium">An error has occurred: {error.message}</div>;
 
   const handleChangeComment = (e) => {
     const { name, value } = e.target;
