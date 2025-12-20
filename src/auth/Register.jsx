@@ -1,6 +1,7 @@
 import { useMutation } from "@tanstack/react-query";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { Mail, Lock, User, Eye, EyeOff, UserPlus, ArrowRight, Rocket } from "lucide-react";
 import useTogglePassword from "../hooks/helper";
 import apiClient from "../utils/api";
 
@@ -31,7 +32,6 @@ const Register = () => {
       return apiClient.post("users/register", data);
     },
     onSuccess: () => {
-      alert("registration success");
       navigate("/login");
       setFormRegist({
         email: "",
@@ -63,89 +63,116 @@ const Register = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-pink-100 via-purple-100 to-indigo-100 p-4">
-      <div className="bg-white/80 backdrop-blur-xl p-8 rounded-3xl shadow-2xl w-full max-w-md border border-white/50">
-        <div className="text-center mb-8">
-          <h1 className="text-3xl font-extrabold text-gray-800 tracking-tight">Create Account 🚀</h1>
-          <p className="text-gray-500 mt-2 text-sm">Join us and start your journey</p>
-        </div>
-
-        <form onSubmit={submitForm} className="space-y-5">
-          <div className="space-y-1">
-            <label htmlFor="email" className="text-sm font-semibold text-gray-700 ml-1">Email</label>
-            <input
-              type="email"
-              name="email"
-              value={formRegist.email}
-              placeholder="Input an Email"
-              onChange={handleChangeForm}
-              className={`w-full px-5 py-3 rounded-xl border ${validationErrors.email ? 'border-red-400 focus:ring-red-300' : 'border-gray-200 focus:ring-purple-400'} bg-white/50 focus:bg-white focus:ring-2 focus:border-transparent transition-all outline-none placeholder:text-gray-400`}
-            />
-            {validationErrors.email && (
-              <p className="text-red-500 text-xs ml-1 font-medium">{validationErrors.email}</p>
-            )}
-          </div>
-
-          <div className="space-y-1">
-            <label htmlFor="username" className="text-sm font-semibold text-gray-700 ml-1">Username</label>
-            <input
-              name="username"
-              type="text"
-              value={formRegist.username}
-              placeholder="Input username"
-              onChange={handleChangeForm}
-              className={`w-full px-5 py-3 rounded-xl border ${validationErrors.username ? 'border-red-400 focus:ring-red-300' : 'border-gray-200 focus:ring-purple-400'} bg-white/50 focus:bg-white focus:ring-2 focus:border-transparent transition-all outline-none placeholder:text-gray-400`}
-            />
-            {validationErrors.username && (
-              <p className="text-red-500 text-xs ml-1 font-medium">{validationErrors.username}</p>
-            )}
-          </div>
-
-          <div className="space-y-1">
-            <label htmlFor="password" className="text-sm font-semibold text-gray-700 ml-1">Password</label>
-            <div className="relative">
-              <input
-                name="password"
-                type={showPassword ? "text" : "password"}
-                value={formRegist.password}
-                placeholder="Input password"
-                onChange={handleChangeForm}
-                className={`w-full px-5 py-3 rounded-xl border ${validationErrors.password ? 'border-red-400 focus:ring-red-300' : 'border-gray-200 focus:ring-purple-400'} bg-white/50 focus:bg-white focus:ring-2 focus:border-transparent transition-all outline-none placeholder:text-gray-400`}
-              />
-              <button
-                type="button"
-                onClick={toggleShowPassword}
-                className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-purple-600 text-sm font-medium transition-colors"
-              >
-                {showPassword ? "Hide" : "Show"}
-              </button>
+    <div className="min-h-screen flex items-center justify-center bg-[#FAF9F6] p-4 font-sans">
+      <div className="bg-white p-10 rounded-[3rem] shadow-[0_20px_50px_-20px_rgba(0,0,0,0.08)] w-full max-w-md border border-gray-50 relative overflow-hidden">
+        <div className="absolute top-0 right-0 w-32 h-32 bg-pink-50 rounded-full -mr-16 -mt-16 z-0"></div>
+        
+        <div className="relative z-10">
+          <div className="text-center mb-10">
+            <div className="bg-gray-900 w-16 h-16 rounded-[1.5rem] flex items-center justify-center text-white mx-auto mb-6 shadow-xl shadow-gray-100 -rotate-6">
+              <Rocket size={32} />
             </div>
-            {validationErrors.password && (
-              <p className="text-red-500 text-xs ml-1 font-medium">{validationErrors.password}</p>
-            )}
+            <h1 className="text-4xl font-black text-gray-900 tracking-tight mb-2">Join us!</h1>
+            <p className="text-gray-400 font-bold text-sm uppercase tracking-widest">Start your journey today</p>
           </div>
 
-          <button
-            type="submit"
-            disabled={registrasi.isPending}
-            className="w-full py-3.5 bg-gradient-to-r from-pink-500 to-purple-600 text-white rounded-xl font-bold shadow-lg hover:shadow-xl hover:scale-[1.02] active:scale-[0.98] transition-all duration-200 disabled:opacity-70 disabled:cursor-not-allowed mt-4"
-          >
-            {registrasi.isPending ? "Registering..." : "Register"}
-          </button>
+          <form onSubmit={submitForm} className="space-y-5">
+            <div className="space-y-2">
+              <label className="text-xs font-black text-gray-400 uppercase tracking-widest ml-1">Email Address</label>
+              <div className="relative group">
+                <div className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-violet-500 transition-colors">
+                  <Mail size={18} />
+                </div>
+                <input
+                  type="email"
+                  name="email"
+                  value={formRegist.email}
+                  placeholder="name@vibe.com"
+                  onChange={handleChangeForm}
+                  className={`w-full pl-12 pr-6 py-4 rounded-2xl border-2 ${validationErrors.email ? 'border-red-100 bg-red-50/30' : 'border-transparent bg-gray-50 focus:border-violet-200 focus:bg-white'} outline-none font-bold text-gray-700 placeholder:text-gray-300 transition-all`}
+                />
+              </div>
+              {validationErrors.email && (
+                <p className="text-red-500 text-[10px] font-black uppercase ml-2 tracking-wider">{validationErrors.email}</p>
+              )}
+            </div>
 
-          <div className="text-center mt-6">
-            <p className="text-gray-500 text-sm">
-              Already have an account?{" "}
-              <button
-                type="button"
-                onClick={toggleLogin}
-                className="text-purple-600 font-bold hover:text-purple-700 hover:underline transition-all"
-              >
-                Login
-              </button>
-            </p>
-          </div>
-        </form>
+            <div className="space-y-2">
+              <label className="text-xs font-black text-gray-400 uppercase tracking-widest ml-1">Username</label>
+              <div className="relative group">
+                <div className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-violet-500 transition-colors">
+                  <User size={18} />
+                </div>
+                <input
+                  name="username"
+                  type="text"
+                  value={formRegist.username}
+                  placeholder="cool_human"
+                  onChange={handleChangeForm}
+                  className={`w-full pl-12 pr-6 py-4 rounded-2xl border-2 ${validationErrors.username ? 'border-red-100 bg-red-50/30' : 'border-transparent bg-gray-50 focus:border-violet-200 focus:bg-white'} outline-none font-bold text-gray-700 placeholder:text-gray-300 transition-all`}
+                />
+              </div>
+              {validationErrors.username && (
+                <p className="text-red-500 text-[10px] font-black uppercase ml-2 tracking-wider">{validationErrors.username}</p>
+              )}
+            </div>
+
+            <div className="space-y-2">
+              <label className="text-xs font-black text-gray-400 uppercase tracking-widest ml-1">Password</label>
+              <div className="relative group">
+                <div className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-violet-500 transition-colors">
+                  <Lock size={18} />
+                </div>
+                <input
+                  name="password"
+                  type={showPassword ? "text" : "password"}
+                  value={formRegist.password}
+                  placeholder="At least 8 vibes long"
+                  onChange={handleChangeForm}
+                  className={`w-full pl-12 pr-14 py-4 rounded-2xl border-2 ${validationErrors.password ? 'border-red-100 bg-red-50/30' : 'border-transparent bg-gray-50 focus:border-violet-200 focus:bg-white'} outline-none font-bold text-gray-700 placeholder:text-gray-300 transition-all`}
+                />
+                <button
+                  type="button"
+                  onClick={toggleShowPassword}
+                  className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-violet-600 transition-colors"
+                >
+                  {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                </button>
+              </div>
+              {validationErrors.password && (
+                <p className="text-red-500 text-[10px] font-black uppercase ml-2 tracking-wider">{validationErrors.password}</p>
+              )}
+            </div>
+
+            <button
+              type="submit"
+              disabled={registrasi.isPending}
+              className="w-full py-5 bg-gray-900 text-white rounded-[1.5rem] font-black text-lg shadow-xl shadow-gray-200 hover:bg-violet-600 hover:shadow-violet-200 transition-all active:scale-[0.98] disabled:opacity-50 mt-4 flex items-center justify-center gap-3"
+            >
+              {registrasi.isPending ? (
+                <div className="w-6 h-6 border-3 border-white/30 border-t-white rounded-full animate-spin"></div>
+              ) : (
+                <>
+                  <span>Create Account</span>
+                  <UserPlus size={20} />
+                </>
+              )}
+            </button>
+
+            <div className="text-center mt-8">
+              <p className="text-gray-400 font-bold text-sm">
+                Already part of the community?{" "}
+                <button
+                  type="button"
+                  onClick={toggleLogin}
+                  className="text-violet-600 font-black hover:text-violet-700 transition-all ml-1"
+                >
+                  Sign In
+                </button>
+              </p>
+            </div>
+          </form>
+        </div>
       </div>
     </div>
   );
