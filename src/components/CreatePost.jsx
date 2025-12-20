@@ -28,6 +28,8 @@ const CreatePost = () => {
   const [activeCommentId, setActiveCommentId] = useState(null);
   const [showProfile, setShowProfile] = useState(false);
   const [selectedUsername, setSelectedUsername] = useState(null);
+  const [validationErrors, setValidationErrors] = useState({});
+  const [editValidationErrors, setEditValidationErrors] = useState({});
 
   const { data, isLoading, isError } = useQuery({
     queryKey: ["post", page, limit],
@@ -38,6 +40,14 @@ const CreatePost = () => {
       return response.data.data;
     },
     staleTime: Infinity,
+  });
+
+  const { data: currentUser } = useQuery({
+    queryKey: ["profile"],
+    queryFn: async () => {
+      const response = await apiClient.get("/social-media/profile");
+      return response.data.data;
+    },
   });
 
   const createPost = useMutation({
@@ -63,9 +73,28 @@ const CreatePost = () => {
         "tags[2]": "",
       });
       setImages([]);
+      setValidationErrors({});
     },
     onError: (error) => {
       console.error(error);
+
+      if (error.response?.status === 422 && error.response?.data?.errors) {
+        const errors = error.response.data.errors;
+        const formattedErrors = {};
+
+        errors.forEach((errorObj) => {
+          const field = Object.keys(errorObj)[0];
+          const message = errorObj[field];
+
+          if (!formattedErrors[field]) {
+            formattedErrors[field] = message;
+          }
+        });
+
+        setValidationErrors(formattedErrors);
+      } else {
+        alert("An error occurred while creating post");
+      }
     },
   });
 
@@ -87,9 +116,28 @@ const CreatePost = () => {
       });
       setEditImages([]);
       setShowEditForm(null);
+      setEditValidationErrors({});
     },
     onError: (error) => {
       console.error(error);
+
+      if (error.response?.status === 422 && error.response?.data?.errors) {
+        const errors = error.response.data.errors;
+        const formattedErrors = {};
+
+        errors.forEach((errorObj) => {
+          const field = Object.keys(errorObj)[0];
+          const message = errorObj[field];
+
+          if (!formattedErrors[field]) {
+            formattedErrors[field] = message;
+          }
+        });
+
+        setEditValidationErrors(formattedErrors);
+      } else {
+        alert("An error occurred while updating post");
+      }
     },
   });
 
@@ -154,14 +202,34 @@ const CreatePost = () => {
     },
   });
 
-  if (isLoading) return <div className="text-center py-20 text-gray-500 font-medium">Loading posts...</div>;
-  if (isError) return <div className="text-center py-20 text-red-500 font-medium">An error has occurred</div>;
+  if (isLoading)
+    return (
+      <div className="text-center py-20 text-gray-500 font-medium">
+        Loading posts...
+      </div>
+    );
+  if (isError)
+    return (
+      <div className="text-center py-20 text-red-500 font-medium">
+        An error has occurred
+      </div>
+    );
 
   console.log("isi data", data);
+
+  // Check if current user is the post author
+  const isPostOwner = (postAuthorId) => {
+    return currentUser?.account?._id === postAuthorId;
+  };
 
   const handleFormPost = (e) => {
     const { name, value } = e.target;
     setFormPost({ ...formPost, [name]: value });
+
+    // Clear validation error for this field when user starts typing
+    if (validationErrors[name]) {
+      setValidationErrors({ ...validationErrors, [name]: null });
+    }
   };
 
   const handleImage = (e) => {
@@ -171,6 +239,11 @@ const CreatePost = () => {
   const handleEditPost = (e) => {
     const { name, value } = e.target;
     setEditPost({ ...editPost, [name]: value });
+
+    // Clear validation error for this field when user starts typing
+    if (editValidationErrors[name]) {
+      setEditValidationErrors({ ...editValidationErrors, [name]: null });
+    }
   };
 
   const handleEditImage = (e) => {
@@ -184,6 +257,7 @@ const CreatePost = () => {
 
   const toggleShowEditPost = (index) => {
     setShowEditForm(index);
+    setEditValidationErrors({});
   };
 
   const submitPost = (e) => {
@@ -222,27 +296,47 @@ const CreatePost = () => {
     <div className="max-w-3xl mx-auto space-y-8">
       {/* Create Post Card */}
       <div className="bg-white/80 backdrop-blur-md rounded-3xl shadow-sm p-6 border border-white/50">
-        <h3 className="text-xl font-bold text-gray-800 mb-4">Create New Post ✍️</h3>
+        <h3 className="text-xl font-bold text-gray-800 mb-4">
+          Create New Post ✍️
+        </h3>
         <form onSubmit={submitPost} className="space-y-4">
-          <textarea
-            name="content"
-            value={formPost.content}
-            onChange={handleFormPost}
-            placeholder="What's on your mind?"
-            className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-purple-400 focus:border-transparent outline-none resize-none h-24 bg-gray-50/50"
-          />
-          <div className="flex flex-col sm:flex-row gap-3">
-             <div className="relative flex-1">
-                <input
-                  type="file"
-                  multiple={true}
-                  name="images"
-                  accept="image/*"
-                  onChange={handleImage}
-                  className="w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-purple-50 file:text-purple-700 hover:file:bg-purple-100"
-                />
-             </div>
+          <div>
+            <textarea
+              name="content"
+              value={formPost.content}
+              onChange={handleFormPost}
+              placeholder="What's on your mind?"
+              className={`w-full px-4 py-3 rounded-xl border ${
+                validationErrors.content
+                  ? "border-red-400 focus:ring-red-400"
+                  : "border-gray-200 focus:ring-purple-400"
+              } focus:ring-2 focus:border-transparent outline-none resize-none h-24 bg-gray-50/50`}
+            />
+            {validationErrors.content && (
+              <p className="text-xs text-red-500 mt-1">
+                {validationErrors.content}
+              </p>
+            )}
           </div>
+
+          <div className="flex flex-col sm:flex-row gap-3">
+            <div className="relative flex-1">
+              <input
+                type="file"
+                multiple={true}
+                name="images"
+                accept="image/*"
+                onChange={handleImage}
+                className="w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-purple-50 file:text-purple-700 hover:file:bg-purple-100"
+              />
+              {validationErrors.images && (
+                <p className="text-xs text-red-500 mt-1">
+                  {validationErrors.images}
+                </p>
+              )}
+            </div>
+          </div>
+
           <div className="flex gap-2">
             <input
               type="text"
@@ -269,26 +363,34 @@ const CreatePost = () => {
               className="flex-1 px-3 py-2 rounded-lg border border-gray-200 text-sm focus:ring-2 focus:ring-purple-200 outline-none"
             />
           </div>
-          <button 
-            type="submit" 
-            className="w-full py-3 bg-gradient-to-r from-purple-600 to-pink-500 text-white rounded-xl font-bold hover:shadow-lg hover:opacity-90 transition-all"
+
+          <button
+            type="submit"
+            disabled={createPost.isPending}
+            className="w-full py-3 bg-gradient-to-r from-purple-600 to-pink-500 text-white rounded-xl font-bold hover:shadow-lg hover:opacity-90 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            Post It!
+            {createPost.isPending ? "Posting..." : "Post It!"}
           </button>
         </form>
       </div>
 
       {data.posts.length === 0 ? (
         <div className="text-center py-10">
-          <p className="text-gray-500 text-lg">No posts yet. Be the first to share something!</p>
+          <p className="text-gray-500 text-lg">
+            No posts yet. Be the first to share something!
+          </p>
         </div>
       ) : (
         <div className="space-y-6">
-          <h1 className="text-2xl font-black text-gray-800 pl-2">Explore Posts 🌍</h1>
+          <h1 className="text-2xl font-black text-gray-800 pl-2">
+            Explore Posts 🌍
+          </h1>
           <div className="space-y-6">
             {data.posts.map((d, index) => (
-              <div key={d._id} className="bg-white rounded-3xl shadow-sm p-6 border border-gray-100 transition-shadow hover:shadow-md">
-                
+              <div
+                key={d._id}
+                className="bg-white rounded-3xl shadow-sm p-6 border border-gray-100 transition-shadow hover:shadow-md"
+              >
                 {/* Header */}
                 <div className="flex justify-between items-start mb-4">
                   <div className="flex items-center gap-3">
@@ -300,49 +402,80 @@ const CreatePost = () => {
                       />
                     ) : (
                       <div className="w-10 h-10 rounded-full bg-gradient-to-br from-purple-200 to-pink-200 flex items-center justify-center text-purple-700 font-bold">
-                         {d.author.account.username.charAt(0).toUpperCase()}
+                        {d.author.account.username.charAt(0).toUpperCase()}
                       </div>
                     )}
                     <div>
-                        <button
-                          onClick={() =>
-                            navigate(`/user-profile/${d.author.account.username}`)
-                          }
-                          className="font-bold text-gray-800 hover:text-purple-600 transition-colors"
-                        >
-                          @{d.author.account.username}
-                        </button>
-                        <p className="text-xs text-gray-400">{new Date(d.createdAt).toLocaleDateString()}</p>
+                      <button
+                        onClick={() =>
+                          navigate(`/user-profile/${d.author.account.username}`)
+                        }
+                        className="font-bold text-gray-800 hover:text-purple-600 transition-colors"
+                      >
+                        @{d.author.account.username}
+                      </button>
+                      <p className="text-xs text-gray-400">
+                        {new Date(d.createdAt).toLocaleDateString()}
+                      </p>
                     </div>
                   </div>
-                  
-                  <div className="flex gap-2">
-                     <button onClick={() => toggleShowEditPost(index)} className="text-gray-400 hover:text-blue-500 text-xs font-medium">Edit</button>
-                     <button onClick={() => deletePost(d._id)} className="text-gray-400 hover:text-red-500 text-xs font-medium">Delete</button>
-                  </div>
+
+                  {/* Show Edit/Delete buttons only if user is the post owner */}
+                  {isPostOwner(d.author.account._id) && (
+                    <div className="flex gap-2">
+                      <button
+                        onClick={() => toggleShowEditPost(index)}
+                        className="text-gray-400 hover:text-blue-500 text-xs font-medium"
+                      >
+                        Edit
+                      </button>
+                      <button
+                        onClick={() => deletePost(d._id)}
+                        className="text-gray-400 hover:text-red-500 text-xs font-medium"
+                      >
+                        Delete
+                      </button>
+                    </div>
+                  )}
                 </div>
 
                 {/* Edit Form Overlay */}
                 {showEditForm === index && (
                   <div className="mb-6 p-4 bg-gray-50 rounded-xl border border-blue-100">
-                    <h4 className="text-sm font-bold text-gray-600 mb-2">Edit Post</h4>
+                    <h4 className="text-sm font-bold text-gray-600 mb-2">
+                      Edit Post
+                    </h4>
                     <div className="space-y-3">
+                      <div>
                         <input
                           type="text"
                           name="content"
                           value={editPost.content}
                           placeholder="Edit content..."
                           onChange={handleEditPost}
-                          className="w-full px-3 py-2 rounded-lg border border-gray-200 text-sm focus:outline-none focus:ring-1 focus:ring-blue-400"
+                          className={`w-full px-3 py-2 rounded-lg border ${
+                            editValidationErrors.content
+                              ? "border-red-400 focus:ring-red-400"
+                              : "border-gray-200 focus:ring-blue-400"
+                          } text-sm focus:outline-none focus:ring-1`}
                         />
-                        <input
-                          type="text"
-                          name="tags[0]"
-                          value={editPost["tags[0]"]}
-                          placeholder="Edit tag..."
-                          onChange={handleEditPost}
-                          className="w-full px-3 py-2 rounded-lg border border-gray-200 text-sm focus:outline-none focus:ring-1 focus:ring-blue-400"
-                        />
+                        {editValidationErrors.content && (
+                          <p className="text-xs text-red-500 mt-1">
+                            {editValidationErrors.content}
+                          </p>
+                        )}
+                      </div>
+
+                      <input
+                        type="text"
+                        name="tags[0]"
+                        value={editPost["tags[0]"]}
+                        placeholder="Edit tag..."
+                        onChange={handleEditPost}
+                        className="w-full px-3 py-2 rounded-lg border border-gray-200 text-sm focus:outline-none focus:ring-1 focus:ring-blue-400"
+                      />
+
+                      <div>
                         <input
                           type="file"
                           multiple={true}
@@ -351,61 +484,99 @@ const CreatePost = () => {
                           onChange={handleEditImage}
                           className="text-xs text-gray-500"
                         />
-                        <button
-                          onClick={() => updatePost(editPost, editImages, d._id)}
-                          className="px-4 py-2 bg-blue-500 text-white rounded-lg text-sm font-semibold hover:bg-blue-600"
-                        >
-                          Update
-                        </button>
+                        {editValidationErrors.images && (
+                          <p className="text-xs text-red-500 mt-1">
+                            {editValidationErrors.images}
+                          </p>
+                        )}
+                      </div>
+
+                      <button
+                        onClick={() => updatePost(editPost, editImages, d._id)}
+                        disabled={updatePostAPI.isPending}
+                        className="px-4 py-2 bg-blue-500 text-white rounded-lg text-sm font-semibold hover:bg-blue-600 disabled:bg-gray-400 disabled:cursor-not-allowed"
+                      >
+                        {updatePostAPI.isPending ? "Updating..." : "Update"}
+                      </button>
                     </div>
                   </div>
                 )}
 
                 {/* Content */}
-                <p className="text-gray-700 mb-4 whitespace-pre-wrap leading-relaxed">{d.content}</p>
-                
+                <p className="text-gray-700 mb-4 whitespace-pre-wrap leading-relaxed">
+                  {d.content}
+                </p>
+
                 {/* Images */}
                 {d.images.length > 0 && (
-                   <div className="grid grid-cols-2 gap-2 mb-4">
-                      {d.images.map((i, idx) => (
-                        <img key={idx} src={i.url} alt="Post attachment" className="rounded-xl object-cover w-full h-48 hover:scale-[1.02] transition-transform" />
-                      ))}
-                   </div>
+                  <div className="grid grid-cols-2 gap-2 mb-4">
+                    {d.images.map((i, idx) => (
+                      <img
+                        key={idx}
+                        src={i.url}
+                        alt="Post attachment"
+                        className="rounded-xl object-cover w-full h-48 hover:scale-[1.02] transition-transform"
+                      />
+                    ))}
+                  </div>
                 )}
 
                 {/* Tags */}
                 {d.tags && d.tags.length > 0 && (
-                   <div className="flex flex-wrap gap-2 mb-4">
-                      {d.tags.map((tag, tIdx) => (
-                         tag && <span key={tIdx} className="px-3 py-1 bg-purple-50 text-purple-600 text-xs font-medium rounded-full">#{tag}</span>
-                      ))}
-                   </div>
+                  <div className="flex flex-wrap gap-2 mb-4">
+                    {d.tags.map(
+                      (tag, tIdx) =>
+                        tag && (
+                          <span
+                            key={tIdx}
+                            className="px-3 py-1 bg-purple-50 text-purple-600 text-xs font-medium rounded-full"
+                          >
+                            #{tag}
+                          </span>
+                        )
+                    )}
+                  </div>
                 )}
 
                 {/* Stats & Actions */}
                 <div className="flex items-center justify-between border-t border-gray-100 pt-4 mt-2">
-                   <div className="flex gap-4">
-                      <div className="flex items-center gap-1">
-                         <span className="text-sm font-bold text-gray-600">{d.likes}</span>
-                         <span className="text-xs text-gray-400">Likes</span>
-                      </div>
-                      <div className="flex items-center gap-1">
-                         <span className="text-sm font-bold text-gray-600">{Array.isArray(d.comments) ? d.comments.length : d.comments}</span>
-                         <span className="text-xs text-gray-400">Comments</span>
-                      </div>
-                   </div>
-                   
-                   <div className="flex gap-2">
-                      <button onClick={() => likePost(d._id)} className="px-3 py-1.5 rounded-lg text-sm font-medium text-pink-600 bg-pink-50 hover:bg-pink-100 transition-colors">
-                        Like
-                      </button>
-                      <button onClick={() => unlikePost(d._id)} className="px-3 py-1.5 rounded-lg text-sm font-medium text-gray-500 hover:bg-gray-100 transition-colors">
-                        Unlike
-                      </button>
-                      <button onClick={() => toggleComments(d._id)} className="px-3 py-1.5 rounded-lg text-sm font-medium text-purple-600 bg-purple-50 hover:bg-purple-100 transition-colors">
-                        {activeCommentId === d._id ? "Close" : "Comment"}
-                      </button>
-                   </div>
+                  <div className="flex gap-4">
+                    <div className="flex items-center gap-1">
+                      <span className="text-sm font-bold text-gray-600">
+                        {d.likes}
+                      </span>
+                      <span className="text-xs text-gray-400">Likes</span>
+                    </div>
+                    <div className="flex items-center gap-1">
+                      <span className="text-sm font-bold text-gray-600">
+                        {Array.isArray(d.comments)
+                          ? d.comments.length
+                          : d.comments}
+                      </span>
+                      <span className="text-xs text-gray-400">Comments</span>
+                    </div>
+                  </div>
+
+                  <div className="flex gap-2">
+                    <button
+                      onClick={() => likePost(d._id)}
+                      className="px-3 py-1.5 rounded-lg text-sm font-medium text-pink-600 bg-pink-50 hover:bg-pink-100 transition-colors"
+                    >
+                      Like
+                    </button>
+                    <button
+                      onClick={() => unlikePost(d._id)}
+                      className="px-3 py-1.5 rounded-lg text-sm font-medium text-gray-500 hover:bg-gray-100 transition-colors"
+                    >
+                      Unlike
+                    </button>
+                    <button
+                      onClick={() => toggleComments(d._id)}
+                      className="px-3 py-1.5 rounded-lg text-sm font-medium text-purple-600 bg-purple-50 hover:bg-purple-100 transition-colors"
+                    >
+                      {activeCommentId === d._id ? "Close" : "Comment"}
+                    </button>
+                  </div>
                 </div>
 
                 {/* Comments Section */}
@@ -413,24 +584,23 @@ const CreatePost = () => {
                   <div className="mt-4 pt-4 border-t border-gray-100 animate-in fade-in slide-in-from-top-2 duration-200">
                     <CommentList postId={d._id} />
                     <div className="mt-4 flex gap-2">
-                       <input
-                          type="text"
-                          name="content"
-                          value={comment.content}
-                          onChange={handleChangeComment}
-                          placeholder="Write a comment..."
-                          className="flex-1 px-4 py-2 rounded-full border border-gray-200 bg-gray-50 focus:bg-white focus:ring-2 focus:ring-purple-200 outline-none transition-all text-sm"
-                        />
-                        <button 
-                          onClick={() => addComment(d._id, comment)}
-                          className="px-4 py-2 bg-purple-600 text-white rounded-full text-sm font-bold hover:bg-purple-700 transition-colors"
-                        >
-                          Send
-                        </button>
+                      <input
+                        type="text"
+                        name="content"
+                        value={comment.content}
+                        onChange={handleChangeComment}
+                        placeholder="Write a comment..."
+                        className="flex-1 px-4 py-2 rounded-full border border-gray-200 bg-gray-50 focus:bg-white focus:ring-2 focus:ring-purple-200 outline-none transition-all text-sm"
+                      />
+                      <button
+                        onClick={() => addComment(d._id, comment)}
+                        className="px-4 py-2 bg-purple-600 text-white rounded-full text-sm font-bold hover:bg-purple-700 transition-colors"
+                      >
+                        Send
+                      </button>
                     </div>
                   </div>
                 )}
-
               </div>
             ))}
           </div>
