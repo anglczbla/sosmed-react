@@ -140,7 +140,7 @@ const CommentList = ({ postId }) => {
             <li key={comment._id} className="group flex gap-4">
               <div className="flex-shrink-0">
                 <div className="w-10 h-10 rounded-2xl bg-violet-50 flex items-center justify-center text-violet-600 font-black text-sm border border-violet-100 shadow-sm">
-                  {comment.author?.username?.charAt(0).toUpperCase() || "U"}
+                  {comment.author?.account?.username?.charAt(0).toUpperCase() || "U"}
                 </div>
               </div>
 
@@ -148,7 +148,7 @@ const CommentList = ({ postId }) => {
                 <div className="bg-gray-50/80 rounded-[1.25rem] px-5 py-4 group-hover:bg-white group-hover:shadow-sm border border-transparent group-hover:border-gray-100 transition-all relative">
                   <div className="flex justify-between items-center mb-1">
                     <span className="font-black text-sm text-gray-900">
-                      @{comment.author?.username || "anonymous"}
+                      @{comment.author?.account?.username || "anonymous"}
                     </span>
                     <div className="flex items-center gap-1.5">
                       <span className="text-[10px] font-black text-gray-400">
