@@ -1,53 +1,16 @@
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { Mail, Lock, Eye, EyeOff, LogIn, ArrowRight, Sparkles } from "lucide-react";
-import Helper from "../hooks/helper";
-import apiClient from "../utils/api";
+import { Mail, Lock, Eye, EyeOff, ArrowRight, Sparkles } from "lucide-react";
+import useLogin from "../hooks/useLogin";
 
 const Login = () => {
-  const navigate = useNavigate();
-  const queryClient = useQueryClient();
-  const { showPassword, toggleShowPassword } = Helper();
-  const [formLogin, setFormLogin] = useState({
-    username: "",
-    password: "",
-  });
-
-  const toggleRegist = () => {
-    navigate("/register");
-  };
-
-  const handleFormLogin = (e) => {
-    const { name, value } = e.target;
-    setFormLogin({ ...formLogin, [name]: value });
-  };
-
-  const login = useMutation({
-    mutationFn: (data) => {
-      return apiClient.post("users/login", data);
-    },
-    onSuccess: (data) => {
-      const { accessToken, user } = data.data.data;
-      localStorage.setItem("accessToken", accessToken);
-      localStorage.setItem("user", JSON.stringify(user));
-      queryClient.invalidateQueries();
-      navigate("/");
-      setFormLogin({
-        username: "",
-        password: "",
-      });
-    },
-    onError: (error) => {
-      console.error(error);
-      alert(error.response?.data?.message || "Login failed");
-    },
-  });
-
-  const submitLogin = (e) => {
-    e.preventDefault();
-    login.mutate(formLogin);
-  };
+  const {
+    formLogin,
+    showPassword,
+    toggleShowPassword,
+    handleFormLogin,
+    submitLogin,
+    toggleRegist,
+    isPending,
+  } = useLogin();
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-[#FAF9F6] p-4 font-sans">
@@ -115,10 +78,10 @@ const Login = () => {
 
             <button
               type="submit"
-              disabled={login.isPending}
+              disabled={isPending}
               className="w-full py-5 bg-gray-900 text-white rounded-[1.5rem] font-black text-lg shadow-xl shadow-gray-200 hover:bg-violet-600 hover:shadow-violet-200 transition-all active:scale-[0.98] disabled:opacity-50 mt-4 flex items-center justify-center gap-3"
             >
-              {login.isPending ? (
+              {isPending ? (
                 <div className="w-6 h-6 border-3 border-white/30 border-t-white rounded-full animate-spin"></div>
               ) : (
                 <>

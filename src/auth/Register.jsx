@@ -1,71 +1,18 @@
-import { useMutation } from "@tanstack/react-query";
 import { Eye, EyeOff, Lock, Mail, Rocket, User, UserPlus } from "lucide-react";
-import { useState } from "react";
-import { useNavigate } from "react-router-dom";
-import useTogglePassword from "../hooks/helper";
-import apiClient from "../utils/api";
+import useRegister from "../hooks/useRegister";
 
 const Register = () => {
-  const navigate = useNavigate();
-  const { showPassword, toggleShowPassword } = useTogglePassword();
-  const [formRegist, setFormRegist] = useState({
-    email: "",
-    password: "",
-    username: "",
-  });
-  const [validationErrors, setValidationErrors] = useState({});
-  const [globalError, setGlobalError] = useState("");
-  console.log(validationErrors);
-
-  const handleChangeForm = (e) => {
-    const { name, value } = e.target;
-    setFormRegist({ ...formRegist, [name]: value });
-    if (validationErrors[name]) {
-      setValidationErrors((prev) => ({ ...prev, [name]: "" }));
-    }
-  };
-
-  const toggleLogin = () => {
-    navigate("/login");
-  };
-
-  const registrasi = useMutation({
-    mutationFn: (data) => {
-      return apiClient.post("users/register", data);
-    },
-    onSuccess: () => {
-      navigate("/login");
-      setFormRegist({
-        email: "",
-        password: "",
-        username: "",
-      });
-      setValidationErrors({});
-    },
-    onError: (error) => {
-      console.error(error);
-      const message = error.response.data.message;
-      const errors = error.response?.data?.errors;
-
-      if (errors && Array.isArray(errors)) {
-        const newErrors = {};
-        errors.forEach((err) => {
-          Object.keys(err).forEach((key) => {
-            newErrors[key] = err[key];
-          });
-        });
-        setValidationErrors(newErrors);
-      }
-      if (message) {
-        setGlobalError(message);
-      }
-    },
-  });
-
-  const submitForm = (e) => {
-    e.preventDefault();
-    registrasi.mutate(formRegist);
-  };
+  const {
+    formRegist,
+    showPassword,
+    toggleShowPassword,
+    validationErrors,
+    globalError,
+    handleChangeForm,
+    submitForm,
+    toggleLogin,
+    isPending,
+  } = useRegister();
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-[#FAF9F6] p-4 font-sans">
@@ -185,10 +132,10 @@ const Register = () => {
 
             <button
               type="submit"
-              disabled={registrasi.isPending}
+              disabled={isPending}
               className="w-full py-5 bg-gray-900 text-white rounded-[1.5rem] font-black text-lg shadow-xl shadow-gray-200 hover:bg-violet-600 hover:shadow-violet-200 transition-all active:scale-[0.98] disabled:opacity-50 mt-4 flex items-center justify-center gap-3"
             >
-              {registrasi.isPending ? (
+              {isPending ? (
                 <div className="w-6 h-6 border-3 border-white/30 border-t-white rounded-full animate-spin"></div>
               ) : (
                 <>

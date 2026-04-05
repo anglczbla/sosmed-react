@@ -1,17 +1,9 @@
-import { Link, useNavigate, useLocation } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { Home, User, PlusSquare, LogOut, LogIn, UserPlus, Sparkles } from "lucide-react";
+import useNavbar from "../hooks/useNavbar";
 
 const Navbar = () => {
-  const navigate = useNavigate();
-  const location = useLocation();
-  const accessToken = localStorage.getItem("accessToken");
-
-  const logout = () => {
-    localStorage.clear();
-    navigate("/");
-  };
-
-  const isActive = (path) => location.pathname === path;
+  const { accessToken, logout, isActive } = useNavbar();
 
   const NavLink = ({ to, icon: Icon, children }) => (
     <Link
