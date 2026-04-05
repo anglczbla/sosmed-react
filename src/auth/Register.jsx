@@ -15,7 +15,7 @@ const Register = () => {
   } = useRegister();
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-[#FAF9F6] p-4 font-sans">
+    <div className="min-h-screen flex items-center justify-center bg-white p-4 font-sans">
       <div className="bg-white p-10 rounded-[3rem] shadow-[0_20px_50px_-20px_rgba(0,0,0,0.08)] w-full max-w-md border border-gray-50 relative overflow-hidden">
         <div className="absolute top-0 right-0 w-32 h-32 bg-pink-50 rounded-full -mr-16 -mt-16 z-0"></div>
 

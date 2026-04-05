@@ -49,230 +49,184 @@ const Home = () => {
     );
 
   return (
-    <div className="max-w-3xl mx-auto px-4 pb-20 space-y-10">
-      {/* Welcome Section */}
-      <div className="bg-[#FAF9F6] border border-gray-100 rounded-[2.5rem] p-10 relative overflow-hidden flex flex-col md:flex-row items-center justify-between gap-8">
-        <div className="relative z-10 text-center md:text-left">
-          <h1 className="text-4xl md:text-5xl font-black text-gray-900 mb-4 tracking-tight leading-tight">
-            What's the{" "}
-            <span className="text-violet-600 underline decoration-violet-200 decoration-8 underline-offset-4">
-              vibe
-            </span>{" "}
-            today?
-          </h1>
-          <p className="text-gray-500 text-lg mb-8 max-w-md font-medium">
-            Explore the latest stories and thoughts from your favorite people.
-          </p>
-          <Link
-            to="/create-post"
-            onClick={handleShareClick}
-            className="group flex items-center gap-3 px-8 py-4 bg-gray-900 text-white font-bold rounded-2xl shadow-2xl shadow-gray-200 hover:bg-violet-600 hover:shadow-violet-200 transition-all active:scale-95 inline-flex"
-          >
-            <span>Share a story</span>
-            <TrendingUp
-              size={20}
-              className="group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform"
-            />
-          </Link>
+    <div className="max-w-3xl mx-auto px-6 pb-32 pt-16">
+      <div className="mb-24 space-y-8 text-center md:text-left">
+        <div className="inline-flex items-center gap-2 px-3 py-1 bg-violet-50 text-violet-600 rounded-full text-[10px] font-bold uppercase tracking-widest">
+          <span className="relative flex h-2 w-2">
+            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-violet-400 opacity-75"></span>
+            <span className="relative inline-flex rounded-full h-2 w-2 bg-violet-500"></span>
+          </span>
+          Currently Vibe-ing
         </div>
-        <div className="relative hidden md:block">
-          <div className="w-48 h-48 bg-violet-100 rounded-[3rem] rotate-12 flex items-center justify-center text-6xl shadow-inner border-2 border-white">
-            ✨
-          </div>
-          <div className="absolute -top-4 -left-4 w-12 h-12 bg-pink-100 rounded-2xl flex items-center justify-center text-2xl shadow-lg border-2 border-white animate-bounce">
-            🔥
+        
+        <div className="space-y-4">
+          <h1 className="text-6xl md:text-7xl font-black text-gray-900 tracking-tight leading-[0.9]">
+            What's the <br/>
+            <span className="text-violet-600">vibe</span> today?
+          </h1>
+          <p className="text-gray-400 text-xl font-medium max-w-md">
+            A clean space for your thoughts, stories, and daily energy.
+          </p>
+        </div>
+
+        <div className="flex flex-col sm:flex-row items-center gap-4 pt-4">
+          <Link 
+            to="/create-post" 
+            onClick={handleShareClick}
+            className="w-full sm:w-auto px-10 py-5 bg-gray-900 text-white font-bold rounded-2xl hover:bg-violet-600 transition-all active:scale-[0.98] flex items-center justify-center gap-3 shadow-lg shadow-gray-200"
+          >
+            <span>Post a Story</span>
+            <TrendingUp size={20} />
+          </Link>
+          <div className="hidden sm:block h-10 w-px bg-gray-100 mx-2"></div>
+          <div className="flex -space-x-3">
+            {[1, 2, 3].map((i) => (
+              <div key={i} className="w-10 h-10 rounded-full border-2 border-white bg-gray-100 flex items-center justify-center text-[10px] font-bold text-gray-400">
+                {String.fromCharCode(64 + i)}
+              </div>
+            ))}
+            <div className="pl-6 text-xs font-bold text-gray-400 flex items-center">
+              +12 people sharing
+            </div>
           </div>
         </div>
       </div>
 
       {data.posts.length === 0 ? (
-        <div className="text-center py-32 bg-white rounded-[2.5rem] border-2 border-dashed border-gray-100">
-          <p className="text-gray-400 text-xl font-medium">
-            Your feed is a bit quiet... <br /> Be the first to break the
-            silence! 🚀
+        <div className="py-40 text-center space-y-4">
+          <div className="w-20 h-20 bg-gray-50 rounded-3xl mx-auto flex items-center justify-center text-3xl">🏜️</div>
+          <p className="text-gray-400 font-bold text-xl tracking-tight">
+            Your feed is empty. <br/>
+            <span className="text-violet-600 hover:underline cursor-pointer">Be the first to post.</span>
           </p>
         </div>
       ) : (
-        <div className="space-y-8">
-          <div className="flex items-center justify-between px-2">
-            <h2 className="text-2xl font-black text-gray-900 flex items-center gap-3">
-              Your Feed{" "}
-              <span className="text-sm bg-gray-100 px-3 py-1 rounded-full font-bold text-gray-500">
-                Newest
-              </span>
-            </h2>
-          </div>
-
-          <div className="grid gap-8">
+        <div className="space-y-24">
+          <div className="grid gap-24">
             {data.posts.map((d) => (
-              <div
-                key={d._id}
-                className="group bg-white rounded-[2rem] p-8 border border-gray-100 hover:border-violet-100 transition-all hover:shadow-[0_20px_50px_-20px_rgba(124,58,237,0.1)]"
-              >
-                {/* Header */}
-                <div className="flex justify-between items-center mb-6">
-                  <div className="flex items-center gap-4">
-                    {d.author.account.avatar?.url ? (
-                      <img
-                        src={d.author.account.avatar.url}
-                        alt={d.author.account.username}
-                        className="w-14 h-14 rounded-2xl object-cover ring-4 ring-gray-50 group-hover:ring-violet-50 transition-all"
-                      />
-                    ) : (
-                      <div className="w-14 h-14 rounded-2xl bg-violet-50 flex items-center justify-center text-violet-600 font-black text-xl border border-violet-100">
-                        {d.author.account.username.charAt(0).toUpperCase()}
-                      </div>
-                    )}
-                    <div>
-                      <button
-                        onClick={() =>
-                          navigate(`/user-profile/${d.author.account.username}`)
-                        }
-                        className="font-black text-gray-900 text-lg hover:text-violet-600 transition-colors block"
-                      >
-                        @{d.author.account.username}
-                      </button>
-                      <div className="flex items-center gap-1.5 text-gray-400 text-xs font-bold uppercase tracking-widest mt-0.5">
-                        <Calendar size={12} />
-                        {new Date(d.createdAt).toLocaleDateString(undefined, {
-                          month: "short",
-                          day: "numeric",
-                        })}
-                      </div>
-                    </div>
-                  </div>
-                  <button className="p-2 text-gray-400 hover:bg-gray-50 rounded-xl transition-colors">
-                    <Share2 size={20} />
-                  </button>
-                </div>
-
-                {/* Content */}
-                <p className="text-gray-700 text-lg mb-6 whitespace-pre-wrap leading-relaxed font-medium">
-                  {d.content}
-                </p>
-
-                {/* Images */}
-                {d.images.length > 0 && (
-                  <div
-                    className={`grid ${d.images.length > 1 ? "grid-cols-2" : "grid-cols-1"} gap-3 mb-6`}
-                  >
-                    {d.images.map((i, idx) => (
-                      <img
-                        key={idx}
-                        src={i.url}
-                        alt="Post attachment"
-                        className="rounded-[1.5rem] object-cover w-full h-64 hover:scale-[1.02] transition-transform duration-500 shadow-sm border border-gray-50"
-                      />
-                    ))}
-                  </div>
-                )}
-
-                {/* Tags */}
-                {d.tags && d.tags.filter((t) => t).length > 0 && (
-                  <div className="flex flex-wrap gap-2 mb-6">
-                    {d.tags.map(
-                      (tag, tIdx) =>
-                        tag && (
-                          <span
-                            key={tIdx}
-                            className="px-4 py-1.5 bg-gray-50 text-gray-600 text-xs font-bold rounded-full border border-gray-100 hover:bg-violet-50 hover:text-violet-600 hover:border-violet-100 transition-colors cursor-default"
-                          >
-                            #{tag}
-                          </span>
-                        ),
-                    )}
-                  </div>
-                )}
-
-                {/* Stats & Actions */}
-                <div className="flex items-center justify-between pt-6 border-t border-gray-50">
-                  <div className="flex gap-6">
+              <article key={d._id} className="group relative">
+                <div className="flex flex-col md:flex-row gap-8">
+                  <aside className="md:w-16 flex-shrink-0 flex md:flex-col items-center gap-4">
                     <button
-                      onClick={() => likePost(d._id)}
-                      className="flex items-center gap-2 group/btn"
+                      onClick={() => navigate(`/user-profile/${d.author.account.username}`)}
+                      className="relative"
                     >
-                      <div
-                        className={`p-2 rounded-xl transition-all ${d.isLiked ? "bg-pink-100 text-pink-600" : "bg-gray-50 text-gray-400 group-hover/btn:bg-pink-50 group-hover/btn:text-pink-500"}`}
-                      >
-                        <Heart
-                          size={20}
-                          fill={d.isLiked ? "currentColor" : "none"}
+                      {d.author.account.avatar?.url ? (
+                        <img
+                          src={d.author.account.avatar.url}
+                          alt={d.author.account.username}
+                          className="w-16 h-16 rounded-3xl object-cover grayscale hover:grayscale-0 transition-all duration-500 ring-1 ring-gray-100"
                         />
-                      </div>
-                      <span
-                        className={`text-sm font-black ${d.isLiked ? "text-pink-600" : "text-gray-500"}`}
-                      >
-                        {d.likes}
-                      </span>
+                      ) : (
+                        <div className="w-16 h-16 rounded-3xl bg-gray-50 flex items-center justify-center text-gray-400 font-black text-xl border border-gray-100">
+                           {d.author.account.username.charAt(0).toUpperCase()}
+                        </div>
+                      )}
                     </button>
+                    <div className="hidden md:block w-px flex-1 bg-gray-50 group-last:bg-transparent"></div>
+                  </aside>
 
-                    <button
-                      onClick={() => toggleComments(d._id)}
-                      className="flex items-center gap-2 group/btn"
-                    >
-                      <div
-                        className={`p-2 rounded-xl transition-all ${activeCommentId === d._id ? "bg-violet-100 text-violet-600" : "bg-gray-50 text-gray-400 group-hover/btn:bg-violet-50 group-hover/btn:text-violet-500"}`}
-                      >
-                        <MessageCircle size={20} />
-                      </div>
-                      <span
-                        className={`text-sm font-black ${activeCommentId === d._id ? "text-violet-600" : "text-gray-500"}`}
-                      >
-                        {Array.isArray(d.comments)
-                          ? d.comments.length
-                          : d.comments}
-                      </span>
-                    </button>
-                  </div>
-
-                  <div className="flex gap-2">
-                    <button
-                      onClick={() => unlikePost(d._id)}
-                      className="px-4 py-2 text-xs font-bold text-gray-400 hover:text-gray-600 transition-colors"
-                    >
-                      Dismiss
-                    </button>
-                  </div>
-                </div>
-
-                {/* Comments Section */}
-                {activeCommentId === d._id && (
-                  <div className="mt-8 pt-8 border-t border-gray-50 animate-in fade-in slide-in-from-top-2 duration-300">
-                    <CommentList postId={d._id} />
-                    {accessToken && (
-                      <div className="mt-6 flex gap-3 bg-gray-50 p-2 rounded-[1.5rem] border border-gray-100 focus-within:border-violet-200 transition-all">
-                        <input
-                          type="text"
-                          name="content"
-                          value={comment.content}
-                          onChange={handleChangeComment}
-                          placeholder="Write a cute comment..."
-                          className="flex-1 px-4 py-3 bg-transparent outline-none text-sm font-medium placeholder:text-gray-400"
-                        />
+                  <div className="flex-1 space-y-6">
+                    <header className="flex justify-between items-start">
+                      <div className="space-y-1">
                         <button
-                          onClick={() => addComment(d._id, comment)}
-                          disabled={!comment.content.trim()}
-                          className="p-3 bg-violet-600 text-white rounded-xl hover:bg-violet-700 transition-all disabled:opacity-50 shadow-lg shadow-violet-100"
+                          onClick={() => navigate(`/user-profile/${d.author.account.username}`)}
+                          className="text-lg font-black text-gray-900 hover:text-violet-600 transition-colors"
                         >
-                          <Send size={18} />
+                          @{d.author.account.username}
                         </button>
+                        <time className="block text-[10px] font-black text-gray-300 uppercase tracking-[0.2em]">
+                          {new Date(d.createdAt).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}
+                        </time>
                       </div>
-                    )}
-                    {!accessToken && (
-                      <div className="mt-6 text-center p-6 bg-gray-50 rounded-2xl text-sm font-bold text-gray-500 border border-gray-100">
-                        Please{" "}
-                        <Link
-                          to="/login"
-                          className="text-violet-600 hover:underline"
-                        >
-                          login
-                        </Link>{" "}
-                        to join the conversation.
+                      <button className="p-2 text-gray-300 hover:text-gray-900 transition-colors">
+                        <Share2 size={18} />
+                      </button>
+                    </header>
+
+                    <section className="space-y-6">
+                      <p className="text-xl text-gray-700 leading-relaxed font-medium">
+                        {d.content}
+                      </p>
+                      
+                      {d.images.length > 0 && (
+                         <div className={`grid ${d.images.length > 1 ? 'grid-cols-2' : 'grid-cols-1'} gap-4`}>
+                            {d.images.map((i, idx) => (
+                              <div key={idx} className="aspect-[4/5] md:aspect-square rounded-[2rem] overflow-hidden bg-gray-50">
+                                <img 
+                                  src={i.url} 
+                                  alt="Post content" 
+                                  className="w-full h-full object-cover grayscale-[0.2] hover:grayscale-0 transition-all duration-700" 
+                                />
+                              </div>
+                            ))}
+                         </div>
+                      )}
+
+                      {d.tags && d.tags.filter(t => t).length > 0 && (
+                        <div className="flex flex-wrap gap-2">
+                           {d.tags.map((tag, tIdx) => (
+                              tag && (
+                               <span key={tIdx} className="text-xs font-bold text-gray-400 hover:text-violet-600 cursor-pointer">
+                                 #{tag}
+                               </span>
+                              )
+                           ))}
+                        </div>
+                      )}
+                    </section>
+
+                    <footer className="flex items-center gap-8 pt-4">
+                      <button 
+                        onClick={() => likePost(d._id)}
+                        className={`flex items-center gap-2 group/btn transition-all ${d.isLiked ? 'text-pink-600' : 'text-gray-400 hover:text-gray-900'}`}
+                      >
+                        <Heart size={20} className="transition-transform group-hover/btn:scale-110" fill={d.isLiked ? "currentColor" : "none"} />
+                        <span className="text-xs font-bold">{d.likes}</span>
+                      </button>
+
+                      <button 
+                        onClick={() => toggleComments(d._id)}
+                        className={`flex items-center gap-2 group/btn transition-all ${activeCommentId === d._id ? 'text-violet-600' : 'text-gray-400 hover:text-gray-900'}`}
+                      >
+                        <MessageCircle size={20} className="transition-transform group-hover/btn:scale-110" />
+                        <span className="text-xs font-bold">
+                           {Array.isArray(d.comments) ? d.comments.length : d.comments}
+                        </span>
+                      </button>
+                    </footer>
+
+                    {activeCommentId === d._id && (
+                      <div className="mt-8 pt-8 border-t border-gray-50 animate-in fade-in slide-in-from-top-2 duration-500">
+                        <CommentList postId={d._id} />
+                        {accessToken ? (
+                            <div className="mt-8 flex gap-4 bg-gray-50 p-2 rounded-2xl border border-gray-100 focus-within:bg-white focus-within:border-violet-200 transition-all">
+                              <input
+                                  type="text"
+                                  name="content"
+                                  value={comment.content}
+                                  onChange={handleChangeComment}
+                                  placeholder="Write a comment..."
+                                  className="flex-1 px-4 py-2 bg-transparent outline-none text-sm font-medium"
+                                />
+                                <button 
+                                  onClick={() => addComment(d._id, comment)}
+                                  disabled={!comment.content.trim()}
+                                  className="p-3 bg-gray-900 text-white rounded-xl hover:bg-violet-600 transition-all disabled:opacity-30"
+                                >
+                                  <Send size={16} />
+                                </button>
+                            </div>
+                        ) : (
+                            <p className="mt-8 text-center text-[10px] font-black text-gray-300 uppercase tracking-widest">
+                                <Link to="/login" className="text-violet-600">Login</Link> to join the vibe
+                            </p>
+                        )}
                       </div>
                     )}
                   </div>
-                )}
-              </div>
+                </div>
+              </article>
             ))}
           </div>
         </div>

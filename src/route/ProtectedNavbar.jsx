@@ -2,9 +2,9 @@ import { Outlet } from "react-router-dom";
 import Navbar from "../components/Navbar";
 const ProtectedNavbar = () => {
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-white">
       <Navbar />
-      <div className="pt-20 pb-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="pt-30 pb-20 max-w-7xl mx-auto px-6 sm:px-8 lg:px-10">
         <Outlet />
       </div>
     </div>
